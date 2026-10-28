@@ -1,0 +1,1490 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1c0b3b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="숫자 파티">
+<title>동물 숫자 파티</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E%F0%9F%90%A5%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap">
+<style>
+[hidden]{display:none!important}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+</style>
+<style>
+/* Layout: one dance floor. The question sits on top, the animal groups stand on lit stages in the middle, big number buttons wait on the floor below; turn cards and results slide over it. */
+:root{
+  --club:#1c0b3b;
+  --club-2:#341166;
+  --panel:#29144f;
+  --line:#523d96;
+  --ink:#fff6fd;
+  --muted:#c3b5e8;
+  --deep-ink:#2a0c4e;
+  --pink:#ff52a9;  --pink-edge:#c42c7d;
+  --cyan:#43e3f3;  --cyan-edge:#169fb0;
+  --sun:#ffd54a;   --sun-edge:#c99a14;
+  --lime:#a7f06f;  --lime-edge:#68b336;
+  --orange:#ff9f4d;
+  --veil:rgba(22,6,46,.88);
+  --glass:rgba(255,255,255,.06);
+  --glass-2:rgba(255,255,255,.1);
+  --shade:rgba(0,0,0,.2);
+  --shadow:rgba(8,2,24,.6);
+  /* 무대 바닥색 (동물마다) */
+  --grass:#cff5b0; --pond:#c2e6ff; --peach:#ffdcc6; --lilac:#e7d8ff;
+  --lemon:#fff2ad; --sea:#adeef2;  --rose:#ffd3e6;  --mint:#c9f4e2;
+  --font-display:"Jua","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  --font-body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  --font-emoji:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0;
+  background-color:var(--club);
+  background-image:radial-gradient(130% 75% at 50% -12%, var(--club-2) 0%, var(--club) 62%);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.5;
+  word-break:keep-all;
+  overflow-wrap:break-word;
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+  overflow-x:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+button,input{font:inherit;color:inherit}
+button{touch-action:manipulation}
+:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+
+/* ---------- 조명과 LED 바닥 ---------- */
+.lights{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.lights i{
+  position:absolute;top:-12%;left:var(--x);width:90vmax;height:140vmax;
+  translate:-50% 0;transform-origin:50% 0;rotate:var(--r0);
+  background:conic-gradient(from 166deg at 50% 0,transparent 0deg,var(--c) 11deg,transparent 27deg);
+  opacity:.15;will-change:rotate;
+  animation:sweep var(--d) ease-in-out infinite alternate;
+}
+.lights i:nth-child(1){--x:10%;--c:var(--pink);--r0:-18deg;--r1:22deg;--d:6.5s}
+.lights i:nth-child(2){--x:50%;--c:var(--cyan);--r0:16deg;--r1:-20deg;--d:8s}
+.lights i:nth-child(3){--x:90%;--c:var(--sun);--r0:22deg;--r1:-14deg;--d:7.2s}
+.floor{
+  position:fixed;left:-30%;right:-30%;bottom:0;height:38vh;z-index:-1;pointer-events:none;
+  --fa:rgba(255,82,169,.26);--fb:rgba(28,11,59,0);
+  background-image:conic-gradient(var(--fa) 25%,var(--fb) 0 50%,var(--fa) 0 75%,var(--fb) 0);
+  background-size:14vh 14vh;
+  transform:perspective(300px) rotateX(60deg);transform-origin:50% 100%;
+  -webkit-mask-image:linear-gradient(to top,#000 15%,transparent 85%);
+          mask-image:linear-gradient(to top,#000 15%,transparent 85%);
+}
+body[data-beat="1"] .floor{--fa:rgba(67,227,243,.24)}
+body[data-beat="2"] .floor{--fa:rgba(255,213,74,.22)}
+body[data-beat="3"] .floor{--fa:rgba(167,240,111,.22)}
+
+.app{max-width:920px;margin:0 auto;padding-block:12px 28px;display:flex;flex-direction:column}
+.screen{display:flex;flex-direction:column;gap:16px}
+
+/* ---------- 버튼 ---------- */
+.cta{
+  appearance:none;border:0;cursor:pointer;
+  font-family:var(--font-display);font-size:24px;line-height:1.2;
+  padding:14px 36px;min-height:62px;border-radius:999px;
+  color:var(--deep-ink);background:var(--sun);
+  box-shadow:0 6px 0 var(--sun-edge),0 0 30px rgba(255,213,74,.4),0 14px 26px var(--shadow);
+  transition:transform .12s,box-shadow .12s;
+}
+.cta:active{transform:translateY(4px);box-shadow:0 2px 0 var(--sun-edge),0 0 22px rgba(255,213,74,.35),0 8px 16px var(--shadow)}
+.ghost{
+  appearance:none;cursor:pointer;background:transparent;
+  border:1px dashed var(--line);color:var(--muted);
+  font-family:var(--font-display);font-size:17px;
+  padding:10px 16px;min-height:46px;border-radius:14px;
+}
+.ghost.small{font-size:15px;min-height:40px;padding:7px 14px}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:18px;padding:3px;gap:3px;background:var(--shade)}
+.seg button{
+  appearance:none;border:0;background:transparent;cursor:pointer;
+  color:var(--muted);font-family:var(--font-display);font-size:16px;line-height:1.15;
+  padding:7px 13px;min-height:42px;border-radius:14px;
+  display:grid;place-items:center;
+}
+.seg button[aria-checked="true"]{background:var(--ink);color:var(--deep-ink)}
+.seg-mode button b{font-weight:400;font-size:16px}
+.seg-mode button small{font-size:12.5px;opacity:.85}
+
+/* ---------- 시작 화면 ---------- */
+.setup{max-width:620px;width:100%;margin:0 auto;gap:18px}
+.hero{display:grid;justify-items:center;text-align:center;gap:12px;padding-top:6px}
+.sign{
+  margin:0;font-family:var(--font-display);font-weight:400;
+  font-size:clamp(42px,11.5vw,70px);line-height:1.05;letter-spacing:.01em;
+  display:flex;flex-wrap:wrap;justify-content:center;gap:0 .28em;
+  animation:flicker 2.4s ease-in-out 1 both;
+}
+.sign span{color:var(--ink)}
+.sign .n1{text-shadow:0 0 5px var(--pink),0 0 16px var(--pink),0 0 40px rgba(255,82,169,.65)}
+.sign .n2{text-shadow:0 0 5px var(--cyan),0 0 16px var(--cyan),0 0 40px rgba(67,227,243,.6)}
+.sign .n3{text-shadow:0 0 5px var(--sun),0 0 16px var(--sun),0 0 40px rgba(255,213,74,.6)}
+.lede{margin:0;color:var(--muted);font-size:17px;max-width:27em;text-wrap:balance}
+.demos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:100%}
+.demo{margin:0;display:grid;justify-items:center;align-content:start;gap:8px;padding:12px 10px;border-radius:18px;background:var(--glass);border:1px solid var(--line)}
+.demo figcaption{font-family:var(--font-display);font-size:16px;color:var(--ink)}
+.demo figcaption small{display:block;font-family:var(--font-body);font-size:13px;color:var(--muted)}
+.demo-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px}
+.mini{font-family:var(--font-emoji);font-size:18px;line-height:1.15;padding:5px 7px;border-radius:10px;background:var(--hab);letter-spacing:-1px;max-width:100%}
+.op{font-family:var(--font-display);font-size:22px;line-height:1}
+.mini-ans{font-family:var(--font-display);font-size:23px;line-height:1.2;color:var(--deep-ink);background:var(--sun);border-radius:12px;padding:3px 12px}
+.panel{display:grid;gap:14px;padding:18px;border-radius:22px;background:var(--panel);border:1px solid var(--line);box-shadow:0 12px 40px var(--shadow)}
+.panel h2{margin:0;font-family:var(--font-display);font-weight:400;font-size:22px}
+.players{display:grid;gap:10px}
+.player-row{display:grid;gap:10px;padding:12px;border-radius:16px;background:var(--glass)}
+.who{display:flex;align-items:center;gap:10px}
+.avatar{font-family:var(--font-emoji);font-size:30px;line-height:1}
+.name{
+  flex:1 1 auto;min-width:0;
+  font-family:var(--font-display);font-size:19px;color:var(--ink);
+  background:var(--glass-2);border:1px solid var(--line);border-radius:12px;
+  padding:8px 12px;min-height:44px;
+}
+.opts{display:flex;flex-wrap:wrap;gap:10px 18px}
+.opt{display:flex;align-items:center;gap:8px;min-width:0}
+.opt-label{font-family:var(--font-display);font-size:15px;color:var(--muted)}
+.help{margin:0;font-size:14px;line-height:1.55;color:var(--muted)}
+.row-setting{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.label{font-family:var(--font-display);font-size:17px}
+.check{display:inline-flex;align-items:center;gap:8px;cursor:pointer;min-height:42px;font-family:var(--font-display);font-size:17px;color:var(--ink)}
+.check input{width:22px;height:22px;margin:0;accent-color:var(--pink)}
+.note{margin:0;font-size:14px;color:var(--sun)}
+.setup > .cta{align-self:center;min-width:230px}
+
+/* ---------- 게임 화면 ---------- */
+.play{gap:12px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.scores{display:flex;gap:8px;flex-wrap:wrap;min-width:0}
+.score{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px 5px 8px;border-radius:999px;border:1px solid var(--line);
+  font-family:var(--font-display);font-size:16px;color:var(--muted);
+  transition:background .3s,border-color .3s,color .3s;
+}
+.score .av{font-family:var(--font-emoji);font-size:20px;line-height:1}
+.score .st{color:var(--sun);font-variant-numeric:tabular-nums}
+.score.active{color:var(--ink);border-color:var(--sun);background:rgba(255,213,74,.14)}
+.top-actions{display:flex;align-items:center;gap:6px}
+.progress{font-family:var(--font-display);font-size:15px;color:var(--muted);font-variant-numeric:tabular-nums;padding-inline:4px}
+.icon-btn{
+  appearance:none;cursor:pointer;position:relative;
+  border:1px solid var(--line);background:var(--glass);color:var(--ink);
+  border-radius:999px;min-height:42px;min-width:42px;padding:0 11px;
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  font-family:var(--font-display);font-size:15px;
+}
+.icon-btn .ic{font-family:var(--font-emoji);font-size:17px;line-height:1}
+.icon-btn.off{opacity:.45}
+.icon-btn.off::after{content:"";position:absolute;left:9px;right:9px;top:50%;height:2px;background:var(--ink);rotate:-35deg}
+.icon-btn.armed{border-color:var(--pink);color:var(--pink)}
+.music-on #musicBtn{border-color:var(--pink)}
+.music-on[data-pulse="a"] #musicBtn{animation:ringA .42s ease-out}
+.music-on[data-pulse="b"] #musicBtn{animation:ringB .42s ease-out}
+
+.prompt{
+  appearance:none;border:0;background:none;cursor:pointer;
+  padding:2px 6px;text-align:center;
+  font-family:var(--font-display);font-size:clamp(25px,6.4vw,40px);line-height:1.2;color:var(--ink);
+  text-wrap:balance;text-shadow:0 0 18px rgba(255,82,169,.5);
+}
+.prompt .re{font-family:var(--font-emoji);font-size:.55em;opacity:.7;vertical-align:.18em;margin-left:.25em}
+
+.scene{display:flex;align-items:center;justify-content:center;gap:12px;padding-top:12px}
+.scene.shake{animation:shake .45s ease-in-out}
+.group{
+  position:relative;flex:1 1 0;min-width:0;max-width:440px;
+  padding:12px 10px 10px;border-radius:24px;
+  background:radial-gradient(120% 90% at 50% 0%,rgba(255,255,255,.6),rgba(255,255,255,0) 62%),var(--hab);
+  box-shadow:inset 0 -6px 0 rgba(42,12,78,.09),0 0 0 4px rgba(255,255,255,.12),0 16px 32px var(--shadow);
+}
+.scene.count .group{flex:0 1 480px}
+.tag{
+  position:absolute;left:14px;top:-13px;
+  padding:1px 11px;border-radius:999px;
+  background:var(--deep-ink);color:var(--hab);
+  font-family:var(--font-display);font-size:15px;line-height:1.5;
+}
+.cells{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-content:center;aspect-ratio:5/2;max-width:100%}
+.cell{
+  appearance:none;border:0;background:transparent;cursor:pointer;padding:0;
+  position:relative;aspect-ratio:1;max-width:100%;display:grid;place-items:center;
+  container-type:inline-size;border-radius:16px;
+}
+.cell .em{
+  display:block;font-family:var(--font-emoji);font-size:64cqi;line-height:1;
+  rotate:var(--tilt);filter:drop-shadow(0 3px 0 rgba(42,12,78,.14));
+}
+.music-on[data-pulse="a"] .cell .em{animation:bopA .34s ease-out}
+.music-on[data-pulse="b"] .cell .em{animation:bopB .34s ease-out}
+.badge{
+  position:absolute;right:0;top:0;
+  min-width:44cqi;height:44cqi;padding-inline:6cqi;border-radius:999px;
+  background:var(--deep-ink);color:var(--sun);
+  font-family:var(--font-display);font-size:30cqi;line-height:44cqi;text-align:center;
+  font-variant-numeric:tabular-nums;
+  scale:0;transition:scale .25s cubic-bezier(.2,1.6,.4,1);
+}
+.cell.counted .badge{scale:1}
+.cell.pop{animation:pop .35s ease-out}
+.cell.wiggle{animation:wiggle .35s ease-in-out}
+.scene.cheer .cell{animation:cheer .47s ease-in-out var(--dl) infinite alternate}
+.plus{
+  flex:0 0 auto;font-family:var(--font-display);font-size:clamp(42px,8vw,64px);line-height:1;
+  color:var(--sun);text-shadow:0 0 18px rgba(255,213,74,.6);
+}
+
+.equation{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;min-height:56px}
+.eq-num{
+  min-width:56px;height:52px;padding:0 12px;display:inline-grid;place-items:center;
+  border-radius:16px;background:var(--hab);color:var(--deep-ink);
+  font-family:var(--font-display);font-size:32px;line-height:1;font-variant-numeric:tabular-nums;
+  box-shadow:0 4px 0 var(--shade);
+}
+.eq-num.ans{background:var(--sun)}
+.eq-num.unknown{background:transparent;border:2px dashed var(--line);color:var(--muted);box-shadow:none}
+.eq-num.fill{animation:pop .4s ease-out}
+.eq-op{font-family:var(--font-display);font-size:32px;line-height:1;color:var(--ink)}
+.eq-unit{font-family:var(--font-display);font-size:24px;color:var(--muted)}
+
+.assist{display:flex;align-items:center;justify-content:center;gap:8px 12px;flex-wrap:wrap;min-height:40px}
+.tip{margin:0;font-size:15px;color:var(--muted);text-align:center}
+.tip.nudge{animation:nudge .5s ease-out}
+
+.options{display:grid;gap:14px;grid-template-columns:repeat(var(--cols,2),minmax(0,1fr));width:100%;max-width:640px;margin:0 auto}
+.options[data-n="3"]{--cols:3}
+.options[data-n="4"]{--cols:4}
+.num{
+  appearance:none;border:0;cursor:pointer;
+  min-height:clamp(86px,19vw,122px);border-radius:26px;
+  background:var(--c);color:var(--deep-ink);
+  font-family:var(--font-display);font-size:clamp(50px,13.5vw,86px);line-height:1;font-variant-numeric:tabular-nums;
+  box-shadow:0 7px 0 var(--ce),0 16px 26px var(--shadow);
+  transition:transform .12s,box-shadow .12s,opacity .3s,filter .3s;
+}
+.num:active{transform:translateY(4px);box-shadow:0 3px 0 var(--ce),0 8px 16px var(--shadow)}
+.num.wrong{filter:grayscale(1);opacity:.32;cursor:default}
+.num.right{animation:winner .8s ease-out;box-shadow:0 7px 0 var(--ce),0 0 0 6px var(--ink),0 0 46px var(--c)}
+
+/* ---------- 넘기기 · 결과 ---------- */
+.overlay{
+  position:fixed;inset:0;z-index:30;display:grid;place-items:center;
+  padding:calc(24px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  background:var(--veil);
+}
+.turn-inner{display:grid;justify-items:center;gap:12px;text-align:center;max-width:420px}
+.turn-avatar{font-family:var(--font-emoji);font-size:86px;line-height:1;animation:hop 1s ease-in-out infinite}
+.turn-name{margin:0;font-family:var(--font-display);font-size:clamp(34px,9vw,48px);line-height:1.15;text-shadow:0 0 18px rgba(67,227,243,.6)}
+.turn-mode{margin:0;font-family:var(--font-display);font-size:21px;color:var(--sun)}
+.turn-sub{margin:0;color:var(--muted)}
+
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:center;pointer-events:none;
+  padding:0 max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+}
+.sheet-inner{
+  pointer-events:auto;width:min(100%,520px);display:grid;justify-items:center;gap:8px;
+  padding:16px 18px 20px;border-radius:26px;background:var(--panel);border:2px solid var(--sun);
+  box-shadow:0 -10px 50px var(--shadow);animation:rise .45s cubic-bezier(.2,1.3,.4,1);
+}
+.sheet-stars{display:flex;gap:6px;font-size:40px;line-height:1}
+.sheet-stars span{color:var(--line)}
+.sheet-stars span.on{color:var(--sun);text-shadow:0 0 18px rgba(255,213,74,.7)}
+.sheet-eq{margin:0;font-family:var(--font-display);font-size:clamp(34px,9vw,48px);line-height:1.15;color:var(--ink);font-variant-numeric:tabular-nums}
+.sheet-eq .e{font-family:var(--font-emoji);font-size:.62em;vertical-align:.12em;margin-right:.08em}
+.sheet-eq b{font-weight:400;color:var(--sun)}
+.sheet-msg{margin:0;font-family:var(--font-display);font-size:19px;color:var(--muted);text-align:center}
+
+.end{align-items:center;text-align:center;gap:18px;padding-top:24px;max-width:560px;margin:0 auto;width:100%}
+.end-title{
+  margin:0;font-family:var(--font-display);font-weight:400;
+  font-size:clamp(36px,9vw,54px);line-height:1.1;text-wrap:balance;
+  text-shadow:0 0 6px var(--pink),0 0 22px var(--pink);
+}
+.end-sub{margin:0;color:var(--muted);font-size:17px}
+.end-players{display:grid;gap:12px;width:100%}
+.end-player{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:20px;background:var(--panel);border:1px solid var(--line);text-align:left}
+.end-player .av{font-family:var(--font-emoji);font-size:42px;line-height:1}
+.end-player .nm{flex:1;min-width:0;font-family:var(--font-display);font-size:24px;line-height:1.2}
+.end-player .nm small{display:block;font-family:var(--font-body);font-size:14px;color:var(--muted)}
+.end-player .st{font-family:var(--font-display);font-size:28px;color:var(--sun);font-variant-numeric:tabular-nums;white-space:nowrap}
+.end-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center}
+
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:25;overflow:hidden}
+.confetti i{position:absolute;top:-24px;width:10px;height:16px;border-radius:3px;background:var(--c);animation:fall var(--dur) linear forwards}
+
+/* ---------- 폭 ---------- */
+@media (max-width:559px){
+  .scene.add{flex-direction:column;gap:6px}
+  .scene.add .group{flex:0 0 auto;width:min(100%,330px)}
+  .scene.add .group + .plus + .group{margin-top:8px}
+  .plus{font-size:38px}
+  .equation{min-height:50px;gap:8px}
+  .eq-num{min-width:48px;height:46px;font-size:28px}
+  .eq-op{font-size:28px}
+}
+@media (max-width:520px){
+  .demos{grid-template-columns:1fr}
+  .score .nm{display:none}
+  .icon-btn .lbl{display:none}
+  .icon-btn.armed .lbl{display:inline}
+  .options[data-n="4"]{--cols:2}
+}
+
+/* ---------- 움직임 ---------- */
+@keyframes sweep{from{rotate:var(--r0)}to{rotate:var(--r1)}}
+@keyframes flicker{0%,16%,21%,58%,61%,100%{opacity:1}18%,59.5%{opacity:.3}}
+@keyframes bopA{0%{translate:0 0;scale:1}35%{translate:-5% -9%;scale:1.05}100%{translate:0 0;scale:1}}
+@keyframes bopB{0%{translate:0 0;scale:1}35%{translate:5% -9%;scale:1.05}100%{translate:0 0;scale:1}}
+@keyframes ringA{0%{box-shadow:0 0 0 0 rgba(255,82,169,.7)}100%{box-shadow:0 0 0 9px rgba(255,82,169,0)}}
+@keyframes ringB{0%{box-shadow:0 0 0 0 rgba(67,227,243,.7)}100%{box-shadow:0 0 0 9px rgba(67,227,243,0)}}
+@keyframes pop{0%{scale:1}40%{scale:1.22}100%{scale:1}}
+@keyframes wiggle{0%,100%{rotate:0deg}30%{rotate:-8deg}70%{rotate:8deg}}
+@keyframes cheer{from{translate:0 0}to{translate:0 -12%}}
+@keyframes shake{0%,100%{translate:0 0}20%{translate:-10px 0}40%{translate:9px 0}60%{translate:-6px 0}80%{translate:4px 0}}
+@keyframes nudge{0%{scale:1}40%{scale:1.08;color:var(--sun)}100%{scale:1}}
+@keyframes winner{0%{scale:1}30%{scale:1.12}60%{scale:.97}100%{scale:1}}
+@keyframes rise{from{translate:0 40px;opacity:0}to{translate:0 0;opacity:1}}
+@keyframes hop{0%,100%{translate:0 0}50%{translate:0 -12px}}
+@keyframes fall{to{transform:translate(var(--dx),112vh) rotate(var(--rot))}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .lights i{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="lights" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="floor" aria-hidden="true"></div>
+
+<main class="app">
+  <!-- 시작 화면 -->
+  <section class="screen setup" id="setup">
+    <header class="hero">
+      <h1 class="sign"><span class="n1">동물</span><span class="n2">숫자</span><span class="n3">파티</span></h1>
+      <p class="lede">신나는 음악에 맞춰 동물 친구들이 춤을 춰요. 몇 마리인지 세어 보고 맞는 숫자를 골라요.</p>
+      <div class="demos">
+        <figure class="demo">
+          <figcaption>더하기 놀이<small>두 묶음을 합해서 19까지</small></figcaption>
+          <div class="demo-row" aria-label="닭 3마리 더하기 오리 7마리는 10">
+            <span class="mini" style="--hab:var(--grass)">🐔🐔🐔</span>
+            <span class="op">+</span>
+            <span class="mini" style="--hab:var(--pond)">🦆🦆🦆🦆🦆🦆🦆</span>
+            <span class="op">=</span>
+            <span class="mini-ans">10</span>
+          </div>
+        </figure>
+        <figure class="demo">
+          <figcaption>세기 놀이<small>한 묶음을 10까지</small></figcaption>
+          <div class="demo-row" aria-label="오리 3마리는 3">
+            <span class="mini" style="--hab:var(--pond)">🦆🦆🦆</span>
+            <span class="op">=</span>
+            <span class="mini-ans">3</span>
+          </div>
+        </figure>
+      </div>
+    </header>
+
+    <div class="panel">
+      <h2>누가 할까요?</h2>
+      <div class="players" id="players"></div>
+      <button type="button" class="ghost" id="togglePlayer">+ 한 명 더</button>
+      <p class="help">보기가 많을수록 어려워요. 문제를 풀다가 동물을 누르면 ‘하나, 둘, 셋’ 하고 같이 세어 줘요. 더하기 놀이에서는 묶음마다 따로 세어요.</p>
+      <div class="row-setting">
+        <span class="label">한 사람당 문제</span>
+        <div class="seg" id="perPlayer" role="radiogroup" aria-label="한 사람당 문제 수">
+          <button type="button" role="radio" data-n="5" aria-checked="true">5문제</button>
+          <button type="button" role="radio" data-n="10" aria-checked="false">10문제</button>
+        </div>
+      </div>
+      <label class="check"><input type="checkbox" id="voiceOn" checked> 문제를 소리로 읽어 줘요</label>
+      <div class="row-setting">
+        <label class="check"><input type="checkbox" id="musicOn" checked> 신나는 음악 틀기</label>
+        <button type="button" class="ghost small" id="previewBtn">▶ 음악 들어 보기</button>
+      </div>
+      <p class="note" id="ttsNote" hidden></p>
+    </div>
+
+    <button type="button" class="cta" id="startBtn">파티 시작!</button>
+  </section>
+
+  <!-- 게임 화면 -->
+  <section class="screen play" id="play" hidden>
+    <div class="topbar">
+      <div class="scores" id="scores"></div>
+      <div class="top-actions">
+        <span class="progress" id="progress"></span>
+        <button type="button" class="icon-btn" id="musicBtn" aria-label="음악 끄기" aria-pressed="true"><span class="ic" aria-hidden="true">🎵</span></button>
+        <button type="button" class="icon-btn" id="voiceBtn" aria-label="소리 끄기" aria-pressed="true"><span class="ic" aria-hidden="true">🔊</span></button>
+        <button type="button" class="icon-btn" id="homeBtn" aria-label="처음으로"><span class="ic" aria-hidden="true">🏠</span><span class="lbl">처음으로</span></button>
+      </div>
+    </div>
+
+    <button type="button" class="prompt" id="prompt" aria-live="polite"></button>
+    <div class="scene" id="scene"></div>
+    <div class="equation" id="equation" aria-live="polite"></div>
+    <div class="assist">
+      <p class="tip" id="tip"></p>
+      <button type="button" class="ghost small" id="recount" hidden>다시 세기</button>
+    </div>
+    <div class="options" id="options"></div>
+  </section>
+
+  <!-- 끝 화면 -->
+  <section class="screen end" id="end" hidden>
+    <h2 class="end-title">파티 끝! 모두 잘했어요</h2>
+    <p class="end-sub">숫자를 세면서 별을 모았어요.</p>
+    <div class="end-players" id="endPlayers"></div>
+    <div class="end-actions">
+      <button type="button" class="cta" id="againBtn">한 번 더 하기</button>
+      <button type="button" class="ghost" id="setupBtn">처음 화면으로</button>
+    </div>
+  </section>
+</main>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-inner">
+    <div class="sheet-stars" id="sheetStars"></div>
+    <p class="sheet-eq" id="sheetEq"></p>
+    <p class="sheet-msg" id="sheetMsg"></p>
+    <button type="button" class="cta" id="nextBtn">다음 문제</button>
+  </div>
+</div>
+
+<div class="overlay" id="turnCard" hidden>
+  <div class="turn-inner">
+    <div class="turn-avatar" id="turnAvatar"></div>
+    <p class="turn-name" id="turnName"></p>
+    <p class="turn-mode" id="turnMode"></p>
+    <p class="turn-sub">화면을 건네주고 버튼을 눌러요</p>
+    <button type="button" class="cta" id="turnGo">준비됐어요!</button>
+  </div>
+</div>
+
+<div class="confetti" id="confetti" aria-hidden="true"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  /*<gen>*/
+  // 동물·물건 카드. hab은 무대 바닥색이에요. 한 쌍은 서로 다른 바닥색을 써서 묶음이 잘 구분되게 했어요.
+  const ITEMS = {
+    chicken:    { name: '닭',       e: '🐔', unit: '마리', hab: 'grass' },
+    duck:       { name: '오리',     e: '🦆', unit: '마리', hab: 'pond' },
+    puppy:      { name: '강아지',   e: '🐶', unit: '마리', hab: 'peach' },
+    cat:        { name: '고양이',   e: '🐱', unit: '마리', hab: 'lilac' },
+    chick:      { name: '병아리',   e: '🐥', unit: '마리', hab: 'mint' },
+    rabbit:     { name: '토끼',     e: '🐰', unit: '마리', hab: 'rose' },
+    pig:        { name: '돼지',     e: '🐷', unit: '마리', hab: 'grass' },
+    cow:        { name: '소',       e: '🐮', unit: '마리', hab: 'pond' },
+    fish:       { name: '물고기',   e: '🐠', unit: '마리', hab: 'sea' },
+    octopus:    { name: '문어',     e: '🐙', unit: '마리', hab: 'lemon' },
+    butterfly:  { name: '나비',     e: '🦋', unit: '마리', hab: 'lemon' },
+    bee:        { name: '꿀벌',     e: '🐝', unit: '마리', hab: 'mint' },
+    frog:       { name: '개구리',   e: '🐸', unit: '마리', hab: 'pond' },
+    turtle:     { name: '거북이',   e: '🐢', unit: '마리', hab: 'peach' },
+    unicorn:    { name: '유니콘',   e: '🦄', unit: '마리', hab: 'lilac' },
+    dino:       { name: '공룡',     e: '🦕', unit: '마리', hab: 'peach' },
+    ladybug:    { name: '무당벌레', e: '🐞', unit: '마리', hab: 'grass' },
+    snail:      { name: '달팽이',   e: '🐌', unit: '마리', hab: 'lemon' },
+    apple:      { name: '사과',     e: '🍎', unit: '개', hab: 'lemon' },
+    strawberry: { name: '딸기',     e: '🍓', unit: '개', hab: 'mint' },
+    balloon:    { name: '풍선',     e: '🎈', unit: '개', hab: 'pond' },
+    gift:       { name: '선물',     e: '🎁', unit: '개', hab: 'lilac' },
+    candy:      { name: '사탕',     e: '🍬', unit: '개', hab: 'pond' },
+    lollipop:   { name: '막대사탕', e: '🍭', unit: '개', hab: 'lemon' },
+    cupcake:    { name: '컵케이크', e: '🧁', unit: '개', hab: 'mint' },
+    donut:      { name: '도넛',     e: '🍩', unit: '개', hab: 'pond' },
+  };
+  // 더하기 놀이에서 함께 나오는 짝 (같은 세는 말끼리)
+  const PAIRS = [
+    ['chicken', 'duck'], ['puppy', 'cat'], ['chick', 'rabbit'], ['pig', 'cow'],
+    ['fish', 'octopus'], ['butterfly', 'bee'], ['frog', 'turtle'], ['unicorn', 'dino'],
+    ['ladybug', 'snail'], ['apple', 'strawberry'], ['balloon', 'gift'], ['candy', 'lollipop'],
+    ['cupcake', 'donut'],
+  ];
+  // max: 답이 될 수 있는 가장 큰 수. 더하기는 한 묶음이 10을 넘지 않아요 (2줄 × 5칸).
+  const MODES = {
+    count10: { kind: 'count', max: 10 },
+    add10:   { kind: 'add',   max: 10 },
+    add19:   { kind: 'add',   max: 19 },
+  };
+  const rand = n => Math.floor(Math.random() * n);
+  const shuffle = arr => {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = rand(i + 1);
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+  const countDeck = max => shuffle(Array.from({ length: max }, (_, i) => i + 1));
+  const addDeck = max => {
+    const out = [];
+    for (let a = 1; a <= 10; a++) for (let b = 1; b <= 10; b++) if (a + b <= max) out.push([a, b]);
+    return shuffle(out);
+  };
+  // 보기: 정답 ±1~3 안에서 고르고, 작은 수부터 순서대로 놓아요.
+  const makeOptions = (answer, n, max) => {
+    const near = [];
+    for (let d = 1; d <= 3; d++) {
+      if (answer - d >= 1) near.push(answer - d);
+      if (answer + d <= max) near.push(answer + d);
+    }
+    return [answer].concat(shuffle(near).slice(0, n - 1)).sort((x, y) => x - y);
+  };
+  // 섞은 카드 더미에서 하나씩 뽑고, 다 쓰면 다시 섞어요.
+  const draw = (bag, key, build) => {
+    if (!bag[key] || !bag[key].length) bag[key] = build();
+    return bag[key].pop();
+  };
+  const makeQuestion = (player, bag) => {
+    const m = MODES[player.mode];
+    if (m.kind === 'count') {
+      const n = draw(player.decks, player.mode, () => countDeck(m.max));
+      const item = draw(bag, 'items', () => shuffle(Object.keys(ITEMS)));
+      return { kind: 'count', groups: [{ item, n }], answer: n, options: makeOptions(n, player.choices, m.max) };
+    }
+    const [a, b] = draw(player.decks, player.mode, () => addDeck(m.max));
+    const pair = PAIRS[draw(bag, 'pairs', () => shuffle(PAIRS.map((_, i) => i)))];
+    const [i1, i2] = Math.random() < 0.5 ? pair : [pair[1], pair[0]];
+    return { kind: 'add', groups: [{ item: i1, n: a }, { item: i2, n: b }], answer: a + b, options: makeOptions(a + b, player.choices, m.max) };
+  };
+
+  // 받침에 따라 조사를 골라요 (닭이 / 오리가)
+  const hasBatchim = w => {
+    const code = w.charCodeAt(w.length - 1) - 0xAC00;
+    return code >= 0 && code <= 11171 && code % 28 !== 0;
+  };
+  const iga = w => (hasBatchim(w) ? '이' : '가');
+  const eunneun = w => (hasBatchim(w) ? '은' : '는');
+  const wagwa = w => (hasBatchim(w) ? '과' : '와');
+  const copula = w => (hasBatchim(w) ? '이에요' : '예요');
+  // 고유어 수: 하나 둘 셋 … / 한 마리 두 마리 …
+  const NAT = ['', '하나', '둘', '셋', '넷', '다섯', '여섯', '일곱', '여덟', '아홉'];
+  const NAT_DET = ['', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉'];
+  const TENS = ['', '열', '스물', '서른', '마흔', '쉰', '예순', '일흔', '여든', '아흔'];
+  const nat = n => TENS[Math.floor(n / 10)] + NAT[n % 10];
+  const natDet = n => (n === 20 ? '스무' : TENS[Math.floor(n / 10)] + NAT_DET[n % 10]);
+  // 한자어로 읽은 숫자 뒤 조사 (칠은 / 이는)
+  const sinoTopic = n => ([2, 4, 5, 9].includes(n % 10) ? '는' : '은');
+
+  const promptText = q => {
+    const A = ITEMS[q.groups[0].item];
+    if (q.kind === 'count') return `${A.name}${iga(A.name)} 몇 ${A.unit}일까요?`;
+    const B = ITEMS[q.groups[1].item];
+    return `${A.name}${wagwa(A.name)} ${B.name}${eunneun(B.name)} 모두 몇 ${A.unit}일까요?`;
+  };
+  const rightSpeech = q => {
+    const A = ITEMS[q.groups[0].item];
+    const tail = `${natDet(q.answer)} ${A.unit}${copula(A.unit)}`;
+    if (q.kind === 'count') return `딩동댕! ${A.name} ${tail}!`;
+    const [g1, g2] = q.groups;
+    return `딩동댕! ${g1.n} 더하기 ${g2.n}${sinoTopic(g2.n)} ${q.answer}! 모두 ${tail}.`;
+  };
+  /*</gen>*/
+
+  const MODE_KEYS = ['count10', 'add10', 'add19'];
+  const MODE_LABEL = { count10: ['세기', '10까지'], add10: ['더하기', '10까지'], add19: ['더하기', '19까지'] };
+  const AVATARS = ['🐻', '🦊'];
+  const NAMES = ['첫째', '둘째'];
+  const BTN_COLORS = [['pink', 'pink-edge'], ['cyan', 'cyan-edge'], ['sun', 'sun-edge'], ['lime', 'lime-edge']];
+  const WRONG_LINES = ['다시 세어 볼까요?', '아깝다! 하나씩 눌러서 세어 봐요.', '괜찮아요. 한 번 더 골라 봐요.'];
+  const STAR_MSG = ['', '끝까지 해냈어요. 멋져요!', '다시 생각해서 맞혔어요. 잘했어요!', '한 번에 맞혔어요. 최고예요!'];
+  const STORE_KEY = 'animal-number-party-v1';
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  const replay = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+
+  /* ---------- 설정 ---------- */
+  const defaults = () => ({
+    count: 2,
+    perPlayer: 5,
+    voice: true,
+    music: true,
+    players: [
+      { name: NAMES[0], mode: 'add19', choices: 2 },
+      { name: NAMES[1], mode: 'count10', choices: 2 },
+    ],
+  });
+  function sanitize(s) {
+    const d = defaults();
+    if (!s || typeof s !== 'object') return d;
+    return {
+      count: s.count === 1 ? 1 : 2,
+      perPlayer: s.perPlayer === 10 ? 10 : 5,
+      voice: s.voice !== false,
+      music: s.music !== false,
+      players: d.players.map((p, i) => {
+        const q = (Array.isArray(s.players) && s.players[i]) || {};
+        return {
+          name: typeof q.name === 'string' ? q.name.slice(0, 8) : p.name,
+          mode: MODE_KEYS.includes(q.mode) ? q.mode : p.mode,
+          choices: [2, 3, 4].includes(q.choices) ? q.choices : p.choices,
+        };
+      }),
+    };
+  }
+  const state = { screen: 'setup', settings: defaults(), game: null };
+  function loadSettings() {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (raw) state.settings = sanitize(JSON.parse(raw));
+    } catch (e) { /* 저장소를 못 쓰면 기본값으로 */ }
+  }
+  function saveSettings() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state.settings)); } catch (e) { /* 무시 */ }
+  }
+
+  /* ---------- 소리 엔진 ---------- */
+  const BPM = 128;
+  const BEAT = 60 / BPM;
+  const S16 = BEAT / 4;
+  const BAR = BEAT * 4;
+  const MUSIC_VOL = 0.42;
+  const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+  const A = { ctx: null };
+
+  function audio() {
+    if (!A.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* 지원 안 하면 넘어가요 */ }
+      let ctx;
+      try { ctx = new AC(); } catch (e) { return null; }
+      A.ctx = ctx;
+      const comp = ctx.createDynamicsCompressor();
+      comp.threshold.value = -14; comp.knee.value = 10; comp.ratio.value = 3;
+      comp.attack.value = 0.004; comp.release.value = 0.2;
+      A.master = ctx.createGain(); A.master.gain.value = 0.9;
+      A.master.connect(comp).connect(ctx.destination);
+      A.duck = ctx.createGain(); A.duck.gain.value = 1; A.duck.connect(A.master);
+      A.music = ctx.createGain(); A.music.gain.value = 0; A.music.connect(A.duck);
+      A.sfx = ctx.createGain(); A.sfx.gain.value = 0.8; A.sfx.connect(A.master);
+      const len = ctx.sampleRate;
+      A.noise = ctx.createBuffer(1, len, ctx.sampleRate);
+      const data = A.noise.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+      // 킥을 살짝 찌그러뜨려 작은 태블릿 스피커에서도 '쿵'이 들리게
+      A.shaper = ctx.createWaveShaper();
+      const curve = new Float32Array(1024);
+      for (let i = 0; i < 1024; i++) curve[i] = Math.tanh(2.2 * (i / 511.5 - 1));
+      A.shaper.curve = curve;
+      A.shaper.connect(A.music);
+      // 점 8분음표 딜레이
+      A.delay = ctx.createDelay(1);
+      A.delay.delayTime.value = S16 * 3;
+      const fb = ctx.createGain(); fb.gain.value = 0.3;
+      const dlp = ctx.createBiquadFilter(); dlp.type = 'lowpass'; dlp.frequency.value = 2600;
+      const wet = ctx.createGain(); wet.gain.value = 0.35;
+      A.delay.connect(dlp); dlp.connect(fb); fb.connect(A.delay);
+      dlp.connect(wet); wet.connect(A.music);
+    }
+    if (A.ctx.state !== 'running' && A.ctx.state !== 'closed') A.ctx.resume().catch(() => {});
+    return A.ctx;
+  }
+  const noiseSrc = () => { const s = A.ctx.createBufferSource(); s.buffer = A.noise; return s; };
+
+  // --- 악기 ---
+  function kick(t) {
+    const c = A.ctx, o = c.createOscillator(), g = c.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(160, t);
+    o.frequency.exponentialRampToValueAtTime(52, t + 0.11);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.85, t + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
+    o.connect(g); g.connect(A.shaper);
+    o.start(t); o.stop(t + 0.45);
+    const n = noiseSrc(), hp = c.createBiquadFilter(), ng = c.createGain();
+    hp.type = 'highpass'; hp.frequency.value = 2500;
+    ng.gain.setValueAtTime(0.16, t);
+    ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.025);
+    n.connect(hp); hp.connect(ng); ng.connect(A.music);
+    n.start(t, Math.random() * 0.5); n.stop(t + 0.03);
+  }
+  function clap(t, vol) {
+    const c = A.ctx, n = noiseSrc(), bp = c.createBiquadFilter(), g = c.createGain();
+    bp.type = 'bandpass'; bp.frequency.value = 1500; bp.Q.value = 0.9;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(vol * 0.25, t + 0.011);
+    g.gain.setValueAtTime(vol, t + 0.013);
+    g.gain.exponentialRampToValueAtTime(vol * 0.25, t + 0.024);
+    g.gain.setValueAtTime(vol * 0.9, t + 0.026);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.24);
+    n.connect(bp); bp.connect(g); g.connect(A.music);
+    n.start(t, Math.random() * 0.5); n.stop(t + 0.26);
+  }
+  function hat(t, open, vol) {
+    const c = A.ctx, n = noiseSrc(), hp = c.createBiquadFilter(), g = c.createGain();
+    hp.type = 'highpass'; hp.frequency.value = open ? 6500 : 8200;
+    const dur = open ? 0.17 : 0.035;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    n.connect(hp); hp.connect(g); g.connect(A.music);
+    n.start(t, Math.random() * 0.5); n.stop(t + dur + 0.01);
+  }
+  function snare(t, vol) {
+    const c = A.ctx, n = noiseSrc(), bp = c.createBiquadFilter(), g = c.createGain();
+    bp.type = 'bandpass'; bp.frequency.value = 2200; bp.Q.value = 0.7;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+    n.connect(bp); bp.connect(g); g.connect(A.music);
+    n.start(t, Math.random() * 0.5); n.stop(t + 0.1);
+    const o = c.createOscillator(), og = c.createGain();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(240, t);
+    o.frequency.exponentialRampToValueAtTime(160, t + 0.06);
+    og.gain.setValueAtTime(vol * 0.6, t);
+    og.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+    o.connect(og); og.connect(A.music);
+    o.start(t); o.stop(t + 0.08);
+  }
+  function crash(t) {
+    const c = A.ctx, n = noiseSrc(), hp = c.createBiquadFilter(), g = c.createGain();
+    n.loop = true;
+    hp.type = 'highpass'; hp.frequency.value = 4500;
+    g.gain.setValueAtTime(0.16, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+    n.connect(hp); hp.connect(g); g.connect(A.music);
+    n.start(t); n.stop(t + 1.45);
+  }
+  function riser(t, dur) {
+    const c = A.ctx, n = noiseSrc(), bp = c.createBiquadFilter(), g = c.createGain();
+    n.loop = true;
+    bp.type = 'bandpass'; bp.Q.value = 1.2;
+    bp.frequency.setValueAtTime(400, t);
+    bp.frequency.exponentialRampToValueAtTime(7000, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.14, t + dur);
+    n.connect(bp); bp.connect(g); g.connect(A.music);
+    n.start(t); n.stop(t + dur);
+  }
+  function bass(t, f, dur, vol) {
+    const c = A.ctx, o1 = c.createOscillator(), o2 = c.createOscillator(), lp = c.createBiquadFilter(), g = c.createGain();
+    o1.type = 'sawtooth'; o1.frequency.value = f;
+    o2.type = 'square'; o2.frequency.value = f; o2.detune.value = 7;
+    lp.type = 'lowpass'; lp.Q.value = 6;
+    lp.frequency.setValueAtTime(2400, t);
+    lp.frequency.exponentialRampToValueAtTime(380, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.006);
+    g.gain.setValueAtTime(vol, t + dur * 0.7);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o1.connect(lp); o2.connect(lp); lp.connect(g); g.connect(A.music);
+    o1.start(t); o2.start(t); o1.stop(t + dur + 0.02); o2.stop(t + dur + 0.02);
+  }
+  function pad(t, freqs, vol) {
+    const c = A.ctx, lp = c.createBiquadFilter(), g = c.createGain(), osc = [];
+    lp.type = 'lowpass'; lp.frequency.value = 1700;
+    freqs.forEach(f => [-10, 10].forEach(cents => {
+      const o = c.createOscillator();
+      o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = cents;
+      o.connect(lp); osc.push(o);
+    }));
+    // 킥이 칠 때마다 패드가 숨을 쉬듯 줄었다가 커져요 (클럽 음악의 '펌핑')
+    g.gain.setValueAtTime(0.0001, t);
+    for (let b = 0; b < 4; b++) {
+      const bt = t + b * BEAT;
+      g.gain.setValueAtTime(vol * 0.08, bt);
+      g.gain.linearRampToValueAtTime(vol, bt + BEAT * 0.62);
+    }
+    g.gain.setValueAtTime(vol, t + BAR - 0.03);
+    g.gain.linearRampToValueAtTime(0.0001, t + BAR);
+    lp.connect(g); g.connect(A.music);
+    osc.forEach(o => { o.start(t); o.stop(t + BAR + 0.01); });
+  }
+  function pluck(t, f, vol) {
+    const c = A.ctx, o = c.createOscillator(), lp = c.createBiquadFilter(), g = c.createGain();
+    o.type = 'square'; o.frequency.value = f;
+    lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(4200, t);
+    lp.frequency.exponentialRampToValueAtTime(900, t + 0.16);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+    o.connect(lp); lp.connect(g); g.connect(A.music); g.connect(A.delay);
+    o.start(t); o.stop(t + 0.22);
+  }
+  function lead(t, f, dur, vol) {
+    const c = A.ctx, g = c.createGain(), lp = c.createBiquadFilter(), osc = [];
+    lp.type = 'lowpass'; lp.frequency.value = 3800; lp.Q.value = 1;
+    [-8, 8].forEach(cents => {
+      const o = c.createOscillator();
+      o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = cents;
+      o.connect(lp); osc.push(o);
+    });
+    const sq = c.createOscillator(), sg = c.createGain();
+    sq.type = 'square'; sq.frequency.value = f; sg.gain.value = 0.6;
+    sq.connect(sg); sg.connect(lp); osc.push(sq);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(vol * 0.8, t + Math.max(0.02, dur * 0.8));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.05);
+    lp.connect(g); g.connect(A.music); g.connect(A.delay);
+    osc.forEach(o => { o.start(t); o.stop(t + dur + 0.07); });
+  }
+
+  // --- 곡: 128BPM, C - G - Am - F. 앞 4마디 인트로, 그다음 16마디(그루브 7 · 빌드업 1 · 드롭 8)를 반복해요 ---
+  const PROG = [
+    { bass: 36, pad: [60, 64, 67], arp: [72, 76, 79, 84] }, // C
+    { bass: 43, pad: [59, 62, 67], arp: [71, 74, 79, 83] }, // G
+    { bass: 45, pad: [60, 64, 69], arp: [69, 72, 76, 81] }, // Am
+    { bass: 41, pad: [60, 65, 69], arp: [69, 72, 77, 81] }, // F
+  ];
+  const ARP = [0, 1, 2, 3, 1, 2, 3, 2];
+  // 드롭 멜로디 (새로 지은 가락): [16분음표 자리, 음높이(MIDI), 길이]
+  const MEL_A = [[0, 76, 2], [3, 79, 1], [4, 81, 2], [6, 79, 2], [8, 76, 1], [10, 74, 1], [11, 76, 2], [14, 79, 2]];
+  const MEL_B = [[0, 74, 2], [3, 79, 1], [4, 83, 2], [6, 81, 2], [8, 79, 2], [11, 74, 1], [12, 76, 2], [14, 74, 2]];
+  const MEL_C = [[0, 72, 2], [3, 76, 1], [4, 81, 2], [6, 79, 2], [8, 76, 1], [10, 79, 1], [11, 81, 2], [14, 84, 2]];
+  const MEL = [
+    MEL_A, MEL_B, MEL_C, [[0, 81, 2], [2, 79, 2], [4, 77, 2], [6, 76, 2], [8, 74, 3], [12, 79, 4]],
+    MEL_A, MEL_B, MEL_C, [[0, 81, 2], [2, 84, 2], [4, 81, 2], [6, 79, 2], [8, 76, 2], [10, 74, 2], [12, 72, 4]],
+  ];
+
+  function playStep(step, t) {
+    const bar = Math.floor(step / 16), s = step % 16;
+    const intro = bar < 4;
+    const lb = intro ? -1 : (bar - 4) % 16;
+    const build = lb === 7;
+    const drop = lb >= 8;
+    const ch = PROG[bar % 4];
+    // 드럼
+    if (s % 4 === 0 && !(build && s === 12)) { kick(t); beatVisual(t, s / 4); }
+    if (!intro && (s === 4 || s === 12) && !(build && s >= 8)) clap(t, 0.3);
+    if (s % 4 === 2) hat(t, true, drop ? 0.11 : 0.09);
+    if (drop && s % 2 === 1) hat(t, false, 0.05);
+    if (build) {
+      if (s >= 8 || s % 2 === 0) snare(t, 0.08 + 0.22 * (s / 15));
+      if (s === 0) riser(t, BAR);
+    }
+    if (lb === 8 && s === 0) crash(t);
+    if ((bar === 3 || lb === 15) && s >= 12) snare(t, 0.16 + 0.03 * (s - 12));
+    // 베이스: 그루브는 엇박, 드롭은 옥타브로 통통 튀어요
+    if (drop) {
+      if (s % 4 === 2) bass(t, mtof(ch.bass), S16 * 0.9, 0.26);
+      if (s % 4 === 3) bass(t, mtof(ch.bass + 12), S16 * 0.9, 0.2);
+    } else if (s % 4 === 2) {
+      bass(t, mtof(ch.bass), S16 * 1.6, 0.26);
+    }
+    if (!intro && s === 0) pad(t, ch.pad.map(mtof), 0.06);
+    if (!intro) pluck(t, mtof(ch.arp[ARP[s % 8]]), drop ? 0.045 : 0.06);
+    if (drop) {
+      for (const [pos, m, len] of MEL[lb - 8]) if (pos === s) lead(t, mtof(m), len * S16, 0.14);
+    }
+  }
+
+  const M = { playing: false, started: false, step: 0, next: 0, timer: null, pulse: false };
+  function tick() {
+    const ctx = A.ctx;
+    if (!ctx || !M.playing || ctx.state !== 'running') return;
+    if (M.next < ctx.currentTime - 0.25) M.next = ctx.currentTime + 0.05; // 멈췄다 돌아오면 박자를 다시 맞춰요
+    while (M.next < ctx.currentTime + 0.12) {
+      playStep(M.step, M.next);
+      M.next += S16;
+      M.step++;
+    }
+  }
+  function musicStart() {
+    const ctx = audio();
+    if (!ctx || M.playing) return;
+    M.playing = true;
+    M.step = M.started ? 64 : 0; // 두 번째부터는 인트로를 건너뛰어요
+    M.started = true;
+    M.next = ctx.currentTime + 0.08;
+    const g = A.music.gain;
+    g.cancelScheduledValues(ctx.currentTime);
+    g.setValueAtTime(g.value, ctx.currentTime);
+    g.linearRampToValueAtTime(MUSIC_VOL, ctx.currentTime + 0.3);
+    M.timer = setInterval(tick, 25);
+    tick();
+    document.body.classList.add('music-on');
+  }
+  function musicStop() {
+    if (!M.playing) return;
+    M.playing = false;
+    clearInterval(M.timer);
+    M.timer = null;
+    const ctx = A.ctx;
+    if (ctx) {
+      const g = A.music.gain;
+      g.cancelScheduledValues(ctx.currentTime);
+      g.setValueAtTime(g.value, ctx.currentTime);
+      g.linearRampToValueAtTime(0, ctx.currentTime + 0.25);
+    }
+    document.body.classList.remove('music-on');
+  }
+  // 킥에 맞춰 화면도 들썩여요
+  function beatVisual(t, beatInBar) {
+    const wait = Math.max(0, (t - A.ctx.currentTime) * 1000);
+    setTimeout(() => {
+      if (!M.playing) return;
+      M.pulse = !M.pulse;
+      document.body.dataset.beat = String(beatInBar);
+      document.body.dataset.pulse = M.pulse ? 'a' : 'b';
+    }, wait);
+  }
+  // 말할 때는 음악을 줄여요
+  function duck(on) {
+    if (!A.ctx) return;
+    const t = A.ctx.currentTime, g = A.duck.gain;
+    g.cancelScheduledValues(t);
+    g.setTargetAtTime(on ? 0.22 : 1, t, on ? 0.04 : 0.3);
+  }
+
+  // --- 효과음 ---
+  function tone(freq, t0, dur, type, vol) {
+    const c = A.ctx, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol, t0 + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(A.sfx);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  const SCALE = [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19];
+  function sfx(kind, k) {
+    if (!state.settings.voice) return;
+    const ctx = audio();
+    if (!ctx) return;
+    const t = ctx.currentTime + 0.01;
+    const run = (notes, gap, dur, type, vol) => notes.forEach((f, i) => tone(f, t + i * gap, dur, type, vol));
+    if (kind === 'count') tone(mtof(72 + SCALE[(k - 1) % SCALE.length]), t, 0.2, 'triangle', 0.16);
+    if (kind === 'tap') tone(880, t, 0.08, 'sine', 0.06);
+    if (kind === 'right') run([523.25, 659.25, 783.99, 1046.5], 0.1, 0.42, 'triangle', 0.16);
+    if (kind === 'wrong') run([311.1, 233.1], 0.15, 0.3, 'sine', 0.13);
+    if (kind === 'end') run([523.25, 659.25, 783.99, 1046.5, 1318.5, 1568], 0.12, 0.5, 'triangle', 0.14);
+  }
+
+  /* ---------- 읽어 주기 ---------- */
+  const tts = { ok: 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined', voice: null, current: null, safety: null };
+  function pickVoice() {
+    if (!tts.ok) return;
+    const voices = speechSynthesis.getVoices();
+    tts.voice = voices.find(v => /^ko/i.test(v.lang)) || null;
+    checkTTS();
+  }
+  function say(text, quick) {
+    if (!state.settings.voice || !tts.ok || !text) return;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'ko-KR';
+      if (tts.voice) u.voice = tts.voice;
+      u.rate = quick ? 1.05 : 0.95;
+      u.pitch = 1.12;
+      const done = () => { if (tts.current === u) { clearTimeout(tts.safety); duck(false); } };
+      u.onend = done;
+      u.onerror = done;
+      tts.current = u;
+      duck(true);
+      clearTimeout(tts.safety);
+      tts.safety = setTimeout(() => duck(false), Math.min(9000, 900 + text.length * 160));
+      speechSynthesis.speak(u);
+    } catch (e) { duck(false); }
+  }
+  function hush() {
+    if (tts.ok) { try { speechSynthesis.cancel(); } catch (e) { /* 무시 */ } }
+    tts.current = null;
+    duck(false);
+  }
+  function checkTTS() {
+    const note = $('ttsNote');
+    if (!tts.ok) {
+      note.textContent = '이 화면에서는 소리로 읽어 주기가 안 돼요. 어른이 문제를 읽어 주세요. 크롬이나 사파리에서 열면 읽어 줄 수 있어요.';
+      note.hidden = false;
+      return;
+    }
+    const voices = speechSynthesis.getVoices();
+    if (voices.length && !tts.voice) {
+      note.textContent = '이 기기에는 한국어 목소리가 없어서 소리가 어색할 수 있어요. 어른이 문제를 읽어 주세요.';
+      note.hidden = false;
+    } else {
+      note.hidden = true;
+    }
+  }
+
+  let wake = null;
+  async function keepAwake() {
+    try {
+      if ('wakeLock' in navigator && !wake) {
+        wake = await navigator.wakeLock.request('screen');
+        wake.addEventListener('release', () => { wake = null; });
+      }
+    } catch (e) { wake = null; }
+  }
+
+  /* ---------- 화면 전환 ---------- */
+  function showScreen(name) {
+    state.screen = name;
+    for (const id of ['setup', 'play', 'end']) $(id).hidden = id !== name;
+    if (name !== 'play') {
+      setSheet(false);
+      $('turnCard').hidden = true;
+    }
+    window.scrollTo(0, 0);
+  }
+  function setSheet(open) { $('sheet').hidden = !open; }
+
+  /* ---------- 시작 화면 ---------- */
+  function renderSetup() {
+    const s = state.settings;
+    const wrap = $('players');
+    wrap.innerHTML = '';
+    for (let i = 0; i < s.count; i++) {
+      const p = s.players[i];
+      const row = document.createElement('div');
+      row.className = 'player-row';
+      row.dataset.i = i;
+      row.innerHTML = `
+        <div class="who">
+          <span class="avatar" aria-hidden="true">${AVATARS[i]}</span>
+          <input class="name" id="p${i}-name" maxlength="8" autocomplete="off" aria-label="${i + 1}번 친구 이름">
+        </div>
+        <div class="opts">
+          <div class="opt">
+            <span class="opt-label">놀이</span>
+            <div class="seg seg-mode" role="radiogroup" aria-label="놀이 종류">
+              ${MODE_KEYS.map(k => `<button type="button" role="radio" data-mode="${k}" aria-checked="${p.mode === k}"><b>${MODE_LABEL[k][0]}</b><small>${MODE_LABEL[k][1]}</small></button>`).join('')}
+            </div>
+          </div>
+          <div class="opt">
+            <span class="opt-label">보기</span>
+            <div class="seg" role="radiogroup" aria-label="보기 수">
+              ${[2, 3, 4].map(n => `<button type="button" role="radio" data-choices="${n}" aria-checked="${p.choices === n}">${n}개</button>`).join('')}
+            </div>
+          </div>
+        </div>`;
+      row.querySelector('.name').value = p.name;
+      wrap.appendChild(row);
+    }
+    $('togglePlayer').textContent = s.count === 2 ? '한 명만 할래요' : '+ 한 명 더';
+    syncSeg($('perPlayer'), 'n', s.perPlayer);
+    syncToggles();
+  }
+  function syncSeg(group, key, value) {
+    group.querySelectorAll('button[role="radio"]').forEach(b => b.setAttribute('aria-checked', String(b.dataset[key] === String(value))));
+  }
+  function syncToggles() {
+    const s = state.settings;
+    $('voiceOn').checked = s.voice;
+    $('musicOn').checked = s.music;
+    const vb = $('voiceBtn');
+    vb.querySelector('.ic').textContent = s.voice ? '🔊' : '🔇';
+    vb.setAttribute('aria-pressed', String(s.voice));
+    vb.setAttribute('aria-label', s.voice ? '소리 끄기' : '소리 켜기');
+    const mb = $('musicBtn');
+    mb.classList.toggle('off', !s.music);
+    mb.setAttribute('aria-pressed', String(s.music));
+    mb.setAttribute('aria-label', s.music ? '음악 끄기' : '음악 켜기');
+    $('previewBtn').textContent = M.playing ? '■ 음악 멈추기' : '▶ 음악 들어 보기';
+  }
+
+  /* ---------- 게임 ---------- */
+  function startGame() {
+    audio();
+    const s = state.settings;
+    const players = s.players.slice(0, s.count).map((p, i) => ({
+      name: p.name.trim() || NAMES[i],
+      mode: p.mode,
+      choices: p.choices,
+      stars: 0,
+      solved: 0,
+      decks: {},
+    }));
+    state.game = { players, total: s.perPlayer * players.length, done: 0, turn: 0, round: 0, current: null, awaitingTurn: false, bag: {} };
+    newRound();
+    showScreen('play');
+    keepAwake();
+    if (s.music) musicStart(); else musicStop();
+    syncToggles();
+    if (players.length > 1) showTurn();
+    else setTimeout(() => say(`숫자 파티를 시작해요! ${promptText(state.game.current)}`), 300);
+  }
+  function newRound() {
+    const g = state.game;
+    const q = makeQuestion(g.players[g.turn], g.bag);
+    q.wrong = [];
+    q.solved = false;
+    q.earned = 0;
+    q.tally = q.groups.map(() => 0);
+    g.current = q;
+    g.round++;
+    renderRound();
+  }
+
+  function renderScores() {
+    const g = state.game;
+    $('scores').innerHTML = g.players.map((p, i) => `
+      <div class="score${i === g.turn ? ' active' : ''}">
+        <span class="av" aria-hidden="true">${AVATARS[i]}</span>
+        <span class="nm">${esc(p.name)}</span>
+        <span class="st" aria-label="별 ${p.stars}개">★ ${p.stars}</span>
+      </div>`).join('');
+    $('progress').textContent = `${Math.min(g.done + 1, g.total)} / ${g.total}`;
+  }
+  function renderRound() {
+    const q = state.game.current;
+    renderScores();
+    $('prompt').innerHTML = `${esc(promptText(q))}<span class="re" aria-hidden="true">🔈</span>`;
+    renderScene();
+    renderEquation();
+    renderOptions();
+    $('tip').textContent = q.kind === 'add' ? '묶음마다 하나씩 눌러서 세어 봐요' : '하나씩 눌러서 같이 세어 봐요';
+    $('recount').hidden = true;
+  }
+  function renderScene() {
+    const q = state.game.current;
+    const scene = $('scene');
+    scene.className = `scene ${q.kind}${q.solved ? ' cheer' : ''}`;
+    const groups = q.groups.map((g, gi) => {
+      const it = ITEMS[g.item];
+      const cells = Array.from({ length: g.n }, (_, i) => {
+        const counted = q.solved;
+        return `<button type="button" class="cell${counted ? ' counted' : ''}" data-g="${gi}" style="--tilt:${(Math.random() * 14 - 7).toFixed(1)}deg;--dl:${(i * 0.04).toFixed(2)}s" aria-label="${esc(it.name)}"><span class="em" aria-hidden="true">${it.e}</span><span class="badge" aria-hidden="true">${counted ? i + 1 : ''}</span></button>`;
+      }).join('');
+      return `<div class="group" style="--hab:var(--${it.hab})"><span class="tag">${esc(it.name)}</span><div class="cells">${cells}</div></div>`;
+    });
+    scene.innerHTML = groups.join(q.kind === 'add' ? '<div class="plus" aria-hidden="true">+</div>' : '');
+  }
+  function groupChip(q, gi) {
+    const g = q.groups[gi], it = ITEMS[g.item];
+    const known = q.solved || q.tally[gi] >= g.n;
+    return `<span class="eq-num${known ? '' : ' unknown'}" data-g="${gi}" style="--hab:var(--${it.hab})">${known ? g.n : '?'}</span>`;
+  }
+  function renderEquation() {
+    const q = state.game.current;
+    const eq = $('equation');
+    if (q.kind === 'add') {
+      eq.innerHTML = `${groupChip(q, 0)}<span class="eq-op">+</span>${groupChip(q, 1)}<span class="eq-op">=</span><span class="eq-num ans${q.solved ? '' : ' unknown'}" data-g="ans">${q.solved ? q.answer : '?'}</span>`;
+    } else {
+      eq.innerHTML = `${groupChip(q, 0)}<span class="eq-unit">${ITEMS[q.groups[0].item].unit}</span>`;
+    }
+  }
+  function renderOptions() {
+    const q = state.game.current;
+    const box = $('options');
+    box.dataset.n = q.options.length;
+    const offset = rand(BTN_COLORS.length);
+    box.innerHTML = q.options.map((v, i) => {
+      const [c, ce] = BTN_COLORS[(i + offset) % BTN_COLORS.length];
+      const wrong = q.wrong.includes(v);
+      const right = q.solved && v === q.answer;
+      return `<button type="button" class="num${wrong ? ' wrong' : ''}${right ? ' right' : ''}" data-v="${v}" style="--c:var(--${c});--ce:var(--${ce})"${wrong ? ' disabled' : ''}>${v}</button>`;
+    }).join('');
+  }
+  function fillChip(key, value) {
+    const chip = $('equation').querySelector(`[data-g="${key}"]`);
+    if (!chip) return;
+    chip.classList.remove('unknown');
+    chip.textContent = value;
+    replay(chip, 'fill');
+  }
+
+  // 동물을 눌러서 세기
+  function onCellTap(btn) {
+    const g = state.game, q = g && g.current;
+    if (!q || q.solved || g.awaitingTurn) return;
+    if (btn.classList.contains('counted')) { replay(btn, 'wiggle'); return; }
+    const gi = +btn.dataset.g;
+    const k = ++q.tally[gi];
+    btn.classList.add('counted');
+    btn.querySelector('.badge').textContent = k;
+    replay(btn, 'pop');
+    sfx('count', k);
+    say(nat(k), true);
+    $('recount').hidden = false;
+    if (k === q.groups[gi].n) fillChip(String(gi), k);
+  }
+  function resetCount() {
+    const q = state.game && state.game.current;
+    if (!q || q.solved) return;
+    q.tally = q.groups.map(() => 0);
+    $('scene').querySelectorAll('.cell').forEach(c => {
+      c.classList.remove('counted');
+      c.querySelector('.badge').textContent = '';
+    });
+    renderEquation();
+    $('recount').hidden = true;
+    sfx('tap');
+  }
+  // 맞히면 모두 순서대로 번호를 달아 보여 줘요
+  function revealCounts() {
+    const q = state.game.current;
+    const round = state.game.round;
+    q.tally = q.groups.map(g => g.n);
+    const groups = $('scene').querySelectorAll('.group');
+    groups.forEach((grp, gi) => {
+      grp.querySelectorAll('.cell').forEach((c, i) => {
+        setTimeout(() => {
+          if (!state.game || state.game.round !== round) return;
+          c.querySelector('.badge').textContent = i + 1;
+          c.classList.add('counted');
+        }, i * 45);
+      });
+      fillChip(String(gi), q.groups[gi].n);
+    });
+    setTimeout(() => {
+      if (state.game && state.game.round === round) $('scene').classList.add('cheer');
+    }, 500);
+  }
+
+  function onPick(btn) {
+    const g = state.game, q = g && g.current;
+    if (!q || q.solved || g.awaitingTurn) return;
+    const v = +btn.dataset.v;
+    if (q.wrong.includes(v)) return;
+    if (v === q.answer) {
+      q.solved = true;
+      q.earned = Math.max(1, 3 - q.wrong.length); // 한 번에 별 3개, 한 번 틀리면 2개, 그 뒤로는 1개
+      const p = g.players[g.turn];
+      p.stars += q.earned;
+      p.solved++;
+      btn.classList.add('right');
+      $('recount').hidden = true;
+      revealCounts();
+      if (q.kind === 'add') fillChip('ans', q.answer);
+      renderScores();
+      sfx('right');
+      say(rightSpeech(q));
+      confetti();
+      const round = g.round;
+      setTimeout(() => {
+        if (state.game === g && g.round === round && state.screen === 'play') showSheet();
+      }, 1100);
+    } else {
+      q.wrong.push(v);
+      btn.classList.add('wrong');
+      btn.disabled = true;
+      replay($('scene'), 'shake');
+      replay($('tip'), 'nudge');
+      sfx('wrong');
+      say(WRONG_LINES[Math.min(q.wrong.length - 1, WRONG_LINES.length - 1)]);
+    }
+  }
+
+  function showSheet() {
+    const g = state.game, q = g.current;
+    if (!q || !q.solved) return;
+    $('sheetStars').innerHTML = [0, 1, 2].map(i => `<span class="${i < q.earned ? 'on' : ''}">★</span>`).join('');
+    $('sheetStars').setAttribute('aria-label', `별 ${q.earned}개`);
+    const e = gi => `<span class="e" aria-hidden="true">${ITEMS[q.groups[gi].item].e}</span>`;
+    $('sheetEq').innerHTML = q.kind === 'add'
+      ? `${e(0)}${q.groups[0].n} + ${e(1)}${q.groups[1].n} = <b>${q.answer}</b>`
+      : `${e(0)}<b>${q.answer}</b>${ITEMS[q.groups[0].item].unit}`;
+    $('sheetMsg').textContent = STAR_MSG[q.earned];
+    $('nextBtn').textContent = g.done + 1 >= g.total ? '결과 보기' : '다음 문제';
+    setSheet(true);
+  }
+  function next() {
+    const g = state.game;
+    if (!g) return;
+    setSheet(false);
+    g.done++;
+    if (g.done >= g.total) { finish(); return; }
+    g.turn = g.done % g.players.length;
+    newRound();
+    window.scrollTo(0, 0);
+    if (g.players.length > 1) showTurn();
+    else setTimeout(() => say(promptText(g.current)), 250);
+  }
+  function showTurn() {
+    const g = state.game, p = g.players[g.turn];
+    g.awaitingTurn = true;
+    $('turnAvatar').textContent = AVATARS[g.turn];
+    $('turnName').textContent = `${p.name} 차례예요!`;
+    $('turnMode').textContent = `${MODE_LABEL[p.mode][0]} 놀이 · ${MODE_LABEL[p.mode][1]}`;
+    $('turnCard').hidden = false;
+    say(`${p.name} 차례예요!`);
+  }
+  function beginTurn() {
+    const g = state.game;
+    if (!g) return;
+    g.awaitingTurn = false;
+    $('turnCard').hidden = true;
+    say(promptText(g.current));
+  }
+  function finish() {
+    const g = state.game;
+    showScreen('end');
+    renderEnd();
+    sfx('end');
+    const lines = g.players.map(p => `${p.name}${eunneun(p.name)} 별 ${natDet(p.stars)} 개`).join(', ');
+    say(`파티 끝! 모두 정말 잘했어요. ${lines}를 모았어요!`);
+  }
+  function renderEnd() {
+    const g = state.game;
+    $('endPlayers').innerHTML = g.players.map((p, i) => `
+      <div class="end-player">
+        <span class="av" aria-hidden="true">${AVATARS[i]}</span>
+        <span class="nm">${esc(p.name)}<small>${MODE_LABEL[p.mode][0]} 놀이 · ${p.solved}문제를 풀었어요</small></span>
+        <span class="st">★ ${p.stars}</span>
+      </div>`).join('');
+  }
+  function goHome() {
+    disarm();
+    musicStop();
+    hush();
+    state.game = null;
+    showScreen('setup');
+    renderSetup();
+  }
+  let armTimer = null;
+  function onHome() {
+    const b = $('homeBtn');
+    if (state.screen === 'play' && !b.classList.contains('armed')) {
+      b.classList.add('armed');
+      b.querySelector('.lbl').textContent = '한 번 더 누르면 나가요';
+      clearTimeout(armTimer);
+      armTimer = setTimeout(disarm, 2600);
+      return;
+    }
+    goHome();
+  }
+  function disarm() {
+    clearTimeout(armTimer);
+    const b = $('homeBtn');
+    b.classList.remove('armed');
+    b.querySelector('.lbl').textContent = '처음으로';
+  }
+  function toggleMusic() {
+    state.settings.music = !state.settings.music;
+    saveSettings();
+    if (state.settings.music) musicStart(); else musicStop();
+    syncToggles();
+  }
+  function toggleVoice() {
+    state.settings.voice = !state.settings.voice;
+    saveSettings();
+    if (!state.settings.voice) hush();
+    syncToggles();
+  }
+  function confetti() {
+    const box = $('confetti');
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const colors = ['pink', 'cyan', 'sun', 'lime', 'orange'];
+    let html = '';
+    for (let i = 0; i < 44; i++) {
+      html += `<i style="left:${(Math.random() * 100).toFixed(1)}%;--c:var(--${colors[i % colors.length]});--dur:${(1.3 + Math.random() * 1.2).toFixed(2)}s;--dx:${Math.round(Math.random() * 160 - 80)}px;--rot:${Math.round(Math.random() * 900 - 450)}deg;animation-delay:${(Math.random() * 0.25).toFixed(2)}s"></i>`;
+    }
+    box.innerHTML = html;
+    clearTimeout(confetti.t);
+    confetti.t = setTimeout(() => { box.innerHTML = ''; }, 3000);
+  }
+
+  /* ---------- 이벤트 ---------- */
+  function bindEvents() {
+    $('players').addEventListener('click', e => {
+      const b = e.target.closest('button[role="radio"]');
+      if (!b) return;
+      const p = state.settings.players[+b.closest('.player-row').dataset.i];
+      if (b.dataset.mode) { p.mode = b.dataset.mode; syncSeg(b.parentElement, 'mode', p.mode); }
+      if (b.dataset.choices) { p.choices = +b.dataset.choices; syncSeg(b.parentElement, 'choices', p.choices); }
+      saveSettings();
+      sfx('tap');
+    });
+    $('players').addEventListener('input', e => {
+      const m = e.target.id && e.target.id.match(/^p(\d)-name$/);
+      if (m) { state.settings.players[+m[1]].name = e.target.value.slice(0, 8); saveSettings(); }
+    });
+    $('togglePlayer').addEventListener('click', () => {
+      state.settings.count = state.settings.count === 2 ? 1 : 2;
+      saveSettings();
+      renderSetup();
+    });
+    $('perPlayer').addEventListener('click', e => {
+      const b = e.target.closest('button[role="radio"]');
+      if (!b) return;
+      state.settings.perPlayer = +b.dataset.n;
+      syncSeg($('perPlayer'), 'n', state.settings.perPlayer);
+      saveSettings();
+    });
+    $('voiceOn').addEventListener('change', e => { state.settings.voice = e.target.checked; saveSettings(); if (!e.target.checked) hush(); syncToggles(); });
+    $('musicOn').addEventListener('change', e => { state.settings.music = e.target.checked; saveSettings(); if (!e.target.checked) musicStop(); syncToggles(); });
+    $('previewBtn').addEventListener('click', () => { if (M.playing) musicStop(); else musicStart(); syncToggles(); });
+    $('startBtn').addEventListener('click', startGame);
+    $('scene').addEventListener('click', e => { const c = e.target.closest('.cell'); if (c) onCellTap(c); });
+    $('options').addEventListener('click', e => { const b = e.target.closest('.num'); if (b) onPick(b); });
+    $('prompt').addEventListener('click', () => { const g = state.game; if (g && g.current) say(promptText(g.current)); });
+    $('recount').addEventListener('click', resetCount);
+    $('musicBtn').addEventListener('click', toggleMusic);
+    $('voiceBtn').addEventListener('click', toggleVoice);
+    $('homeBtn').addEventListener('click', onHome);
+    $('nextBtn').addEventListener('click', next);
+    $('turnGo').addEventListener('click', beginTurn);
+    $('againBtn').addEventListener('click', startGame);
+    $('setupBtn').addEventListener('click', goHome);
+    // 화면을 처음 누를 때 소리를 깨워요 (휴대폰은 누르기 전에는 소리가 안 나요)
+    document.addEventListener('pointerdown', e => {
+      if (!A.ctx && state.screen === 'setup') return;
+      audio();
+      if (state.settings.music && !M.playing && state.screen !== 'setup' && !e.target.closest('#musicBtn')) musicStart();
+    }, { passive: true });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        hush();
+        if (A.ctx) A.ctx.suspend().catch(() => {});
+      } else {
+        if (A.ctx && (M.playing || state.screen !== 'setup')) A.ctx.resume().catch(() => {});
+        if (state.screen === 'play') keepAwake();
+      }
+    });
+    if (tts.ok) {
+      pickVoice();
+      if (speechSynthesis.addEventListener) speechSynthesis.addEventListener('voiceschanged', pickVoice);
+      else speechSynthesis.onvoiceschanged = pickVoice;
+    } else {
+      checkTTS();
+    }
+  }
+
+  /* ---------- 시작 ---------- */
+  function boot(data) {
+    loadSettings();
+    if (data && data.settings) state.settings = sanitize(data.settings);
+    bindEvents();
+    renderSetup();
+    // 화면을 고친 새 버전이 열려도 하던 게임을 이어 가요
+    try {
+      const g = data && data.game;
+      if (g && Array.isArray(g.players) && g.current && Array.isArray(g.current.groups) && (data.screen === 'play' || data.screen === 'end')) {
+        state.game = g;
+        if (data.screen === 'end') { renderEnd(); showScreen('end'); return; }
+        g.awaitingTurn = false;
+        renderRound();
+        showScreen('play');
+        if (g.current.solved) showSheet();
+        return;
+      }
+    } catch (e) { state.game = null; }
+    showScreen('setup');
+  }
+  try {
+    if (window.claude && window.claude.hot && typeof window.claude.hot.snapshot === 'function') {
+      window.claude.hot.snapshot(() => ({ settings: state.settings, screen: state.screen, game: state.game }));
+    }
+  } catch (e) { /* 미리보기 밖에서는 없어요 */ }
+  const hot = window.claude && window.claude.hot;
+  if (hot && typeof hot.ready === 'function') hot.ready(boot);
+  else boot((hot && hot.data) || {});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,2044 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#a9dcff">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="수도 여행">
+<title>세계 수도 여행</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E%F0%9F%8C%8F%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gowun+Dodum&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+[hidden]{display:none!important}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+</style>
+<style>
+/* Layout: a sunny airport. The black split-flap departure board is the hero, boarding-pass tickets underneath hold the choices, and navy passports collect the stamps at the end. */
+:root{
+  --sky:#a9dcff;
+  --sky-2:#e4f4ff;
+  --haze:#fff5e2;
+  --cloud:#ffffff;
+  --ink:#132a4c;
+  --muted:#4b6488;
+  --line:#c6d7ea;
+  --panel:#ffffff;
+  --tint:#eef7ff;
+  --paper:#fffaf0;
+  --paper-edge:#e4d9c0;
+  --board:#15181e;
+  --board-2:#0b0d11;
+  --board-rim:#2b3039;
+  --flap:#2b3039;
+  --flap-2:#20242b;
+  --flap-ink:#ffcc33;
+  --hint-ink:#7fd8ff;
+  --board-muted:#8f99ab;
+  --go:#3ddc84;
+  --red:#e23d4f;   --red-edge:#a8202f;
+  --blue:#2563eb;
+  --green:#14995a;
+  --orange:#ee8a12;
+  --purple:#7b4ce0;
+  --teal:#0e9aa7;
+  --navy:#1d2f5e;
+  --navy-2:#13214a;
+  --gold:#e8c46a;
+  --white:#ffffff;
+  --shadow:rgba(19,42,76,.18);
+  --veil:rgba(13,27,54,.78);
+  --font-display:"Do Hyeon","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  --font-body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --font-emoji:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
+  --font-flag:"Apple Color Emoji","Noto Color Emoji","Segoe UI Emoji",sans-serif;
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0;
+  background-color:var(--sky-2);
+  background-image:linear-gradient(180deg,var(--sky) 0%,var(--sky-2) 55%,var(--haze) 100%);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.5;
+  word-break:keep-all;
+  overflow-wrap:break-word;
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+  overflow-x:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+button,input{font:inherit;color:inherit}
+button{touch-action:manipulation}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.flag{font-family:var(--font-flag);font-style:normal;line-height:1}
+
+/* ---------- 하늘 ---------- */
+.sky-deco{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.cloud{
+  position:absolute;left:0;top:var(--y);width:var(--w);height:calc(var(--w) * .3);
+  border-radius:999px;background:var(--cloud);opacity:.92;
+  animation:drift var(--d) linear infinite;animation-delay:var(--dl);
+}
+.cloud::before,.cloud::after{content:"";position:absolute;border-radius:50%;background:var(--cloud)}
+.cloud::before{left:14%;bottom:30%;width:40%;height:150%}
+.cloud::after{left:46%;bottom:34%;width:32%;height:115%}
+.jet{position:fixed;left:0;top:16%;width:70px;color:var(--navy);opacity:0;pointer-events:none;z-index:26}
+.jet svg{display:block;width:100%;height:auto;fill:currentColor;filter:drop-shadow(0 6px 6px var(--shadow))}
+.jet.go{animation:fly 1.9s ease-in-out}
+
+.app{max-width:900px;margin:0 auto;padding-block:12px 28px;display:flex;flex-direction:column}
+.screen{display:flex;flex-direction:column;gap:16px}
+
+/* ---------- 버튼 ---------- */
+.cta{
+  appearance:none;border:0;cursor:pointer;
+  font-family:var(--font-display);font-size:25px;line-height:1.2;
+  padding:14px 38px;min-height:62px;border-radius:999px;
+  color:var(--white);background:var(--red);
+  box-shadow:0 6px 0 var(--red-edge),0 14px 24px var(--shadow);
+  transition:transform .12s,box-shadow .12s;
+}
+.cta:active{transform:translateY(4px);box-shadow:0 2px 0 var(--red-edge),0 8px 14px var(--shadow)}
+.ghost{
+  appearance:none;cursor:pointer;background:transparent;
+  border:1px dashed var(--muted);color:var(--muted);
+  font-family:var(--font-display);font-size:17px;
+  padding:10px 16px;min-height:46px;border-radius:14px;
+}
+.ghost.small{font-size:15px;min-height:40px;padding:7px 14px}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:16px;padding:3px;gap:3px;background:var(--panel)}
+.seg button{
+  appearance:none;border:0;background:transparent;cursor:pointer;
+  color:var(--muted);font-family:var(--font-display);font-size:16px;line-height:1.15;
+  padding:7px 13px;min-height:42px;border-radius:13px;
+  display:grid;place-items:center;
+}
+.seg button[aria-checked="true"]{background:var(--navy);color:var(--white)}
+
+/* ---------- 출발 안내판 ---------- */
+.tile{
+  position:relative;display:grid;place-items:center;container-type:inline-size;
+  width:clamp(22px, calc((100cqi - (var(--n) - 1) * 4px) / var(--n)), 58px);
+  aspect-ratio:5/6;border-radius:6px;
+  background:linear-gradient(180deg,var(--flap) 0 50%,var(--flap-2) 50% 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 2px 0 var(--board-2);
+}
+.tile::after{content:"";position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;background:var(--board-2)}
+.tile .ch{font-family:var(--font-display);font-size:64cqi;line-height:1;color:var(--flap-ink)}
+.tile.q .ch{color:var(--board-muted)}
+.tile.hint .ch{color:var(--hint-ink)}
+.cover{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;min-height:clamp(44px,12vw,66px);padding:6px 12px;border-radius:6px;
+  background:linear-gradient(180deg,var(--flap) 0 50%,var(--flap-2) 50% 100%);
+  font-family:var(--font-display);font-size:clamp(15px,3.8vw,19px);color:var(--board-muted);
+}
+.cover b{font-weight:400;font-size:1.5em;line-height:1;color:var(--flap-ink)}
+.tile.flip{animation:flip .09s linear}
+
+.board{
+  position:relative;display:grid;gap:10px;
+  padding:12px 14px 16px;border-radius:20px;
+  background:var(--board);color:var(--flap-ink);
+  box-shadow:0 0 0 4px var(--board-rim),0 18px 36px var(--shadow);
+}
+.board.shake{animation:shake .45s ease-in-out}
+.board-head{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding-bottom:8px;border-bottom:1px solid var(--board-rim);
+  font-family:var(--font-display);font-size:15px;color:var(--board-muted);letter-spacing:.04em;
+}
+.bh-left{display:inline-flex;align-items:center;gap:8px;min-width:0}
+.bh-left svg{width:22px;height:22px;fill:var(--flap-ink);flex:0 0 auto}
+.bh-left .code{font-family:var(--font-mono);font-weight:600;color:var(--flap-ink);letter-spacing:.08em}
+.status{display:inline-flex;align-items:center;gap:7px;color:var(--flap-ink);white-space:nowrap}
+.status::before{content:"";width:9px;height:9px;border-radius:50%;background:currentColor;animation:blink 1.1s steps(2,start) infinite}
+.status.arrived{color:var(--go)}
+.status.arrived::before{animation:none}
+.board-grid{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 12px;align-items:center}
+.row-label{grid-column:1/-1;display:flex;gap:8px;align-items:center;font-family:var(--font-display);font-size:14px;color:var(--board-muted);letter-spacing:.06em}
+.row-label .cont{padding:0 8px;border-radius:6px;background:var(--board-rim);color:var(--flap-ink);font-size:13px;line-height:1.6}
+.flagbox{width:clamp(50px,13vw,74px);display:grid;place-items:center}
+.flagbox .flag{font-size:clamp(42px,11vw,62px)}
+.music-on[data-pulse="a"] .flagbox .flag{animation:bobA .36s ease-out}
+.music-on[data-pulse="b"] .flagbox .flag{animation:bobB .36s ease-out}
+.tiles{display:flex;flex-wrap:wrap;gap:4px;container-type:inline-size;min-width:0;perspective:420px}
+
+/* ---------- 시작 화면 ---------- */
+.setup{max-width:640px;width:100%;margin:0 auto;gap:18px}
+.hero{display:grid;justify-items:center;text-align:center;gap:14px;padding-top:8px}
+.title-board{
+  margin:0;font-weight:400;display:flex;flex-wrap:wrap;justify-content:center;gap:10px 12px;
+  padding:14px 18px 16px;border-radius:20px;background:var(--board);
+  box-shadow:0 0 0 4px var(--board-rim),0 16px 34px var(--shadow);
+}
+.title-board .word{display:flex;gap:4px}
+.title-board .tile{width:clamp(36px,11vw,64px)}
+.lede{margin:0;color:var(--muted);font-size:17px;max-width:28em;text-wrap:balance}
+.example{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 10px;font-family:var(--font-display);font-size:18px}
+.example .q{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:999px;background:var(--panel);border:1px solid var(--line)}
+.example .q .flag{font-size:22px}
+.example .arrow{color:var(--red);font-size:22px}
+.mini-ticket{
+  display:inline-flex;align-items:stretch;border-radius:10px;overflow:hidden;
+  background:var(--paper);box-shadow:0 2px 0 var(--paper-edge),0 6px 14px var(--shadow);
+}
+.mini-ticket .stub{width:22px;background:repeating-linear-gradient(135deg,var(--red) 0 6px,var(--paper) 6px 12px,var(--blue) 12px 18px,var(--paper) 18px 24px);border-right:2px dashed var(--paper-edge)}
+.mini-ticket b{font-weight:400;padding:4px 14px;font-size:20px}
+.how{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;counter-reset:step;width:100%}
+.how li{
+  counter-increment:step;display:grid;justify-items:center;align-content:start;gap:6px;
+  text-align:center;font-size:15px;line-height:1.35;color:var(--muted);
+  padding:12px 6px;border-radius:16px;background:rgba(255,255,255,.6);
+}
+.how li::before{
+  content:counter(step);width:30px;height:30px;display:grid;place-items:center;border-radius:50%;
+  font-family:var(--font-mono);font-weight:600;font-size:15px;color:var(--white);background:var(--navy);
+}
+.how b{color:var(--ink);font-weight:400;font-family:var(--font-display);font-size:16px}
+.panel{display:grid;gap:14px;padding:18px;border-radius:22px;background:var(--panel);border:1px solid var(--line);box-shadow:0 12px 30px var(--shadow)}
+.panel h2{margin:0;font-family:var(--font-display);font-weight:400;font-size:23px}
+.players{display:grid;gap:10px}
+.player-row{display:grid;gap:10px;padding:12px;border-radius:16px;background:var(--tint)}
+.who{display:flex;align-items:center;gap:10px}
+.avatar{font-family:var(--font-emoji);font-size:30px;line-height:1}
+.name{
+  flex:1 1 auto;min-width:0;
+  font-family:var(--font-display);font-size:19px;color:var(--ink);
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:8px 12px;min-height:44px;
+}
+.opts{display:flex;flex-wrap:wrap;gap:10px 18px}
+.opt{display:flex;align-items:center;gap:8px;min-width:0}
+.opt-label{font-family:var(--font-display);font-size:15px;color:var(--muted)}
+.help{margin:0;font-size:14px;line-height:1.6;color:var(--muted)}
+.row-setting{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.label{font-family:var(--font-display);font-size:17px}
+.check{display:inline-flex;align-items:center;gap:8px;cursor:pointer;min-height:42px;font-family:var(--font-display);font-size:17px;color:var(--ink)}
+.check input{width:22px;height:22px;margin:0;accent-color:var(--navy)}
+.note{margin:0;font-size:14px;color:var(--red-edge)}
+.start-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center}
+.start-actions .cta{min-width:200px}
+.resume{
+  appearance:none;border:0;cursor:pointer;display:inline-flex;align-items:baseline;gap:8px;
+  font-family:var(--font-display);font-size:22px;line-height:1.2;
+  padding:13px 26px;min-height:58px;border-radius:999px;
+  color:var(--white);background:var(--navy);
+  box-shadow:0 5px 0 var(--navy-2),0 12px 20px var(--shadow);
+}
+.resume small{font-family:var(--font-mono);font-weight:500;font-size:14px;opacity:.85}
+.seg-count button small{display:block;font-family:var(--font-body);font-size:12px;opacity:.85}
+
+/* ---------- 게임 화면 ---------- */
+.play{gap:12px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.scores{display:flex;gap:8px;flex-wrap:wrap;min-width:0}
+.score{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px 5px 8px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.7);
+  font-family:var(--font-display);font-size:16px;color:var(--muted);
+  transition:background .3s,border-color .3s,color .3s;
+}
+.score .av{font-family:var(--font-emoji);font-size:20px;line-height:1}
+.score .st{color:var(--orange);font-variant-numeric:tabular-nums}
+.score.active{color:var(--ink);border-color:var(--navy);background:var(--panel)}
+.top-actions{display:flex;align-items:center;gap:6px}
+.progress{font-family:var(--font-mono);font-weight:500;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums;padding-inline:4px}
+.icon-btn{
+  appearance:none;cursor:pointer;position:relative;
+  border:1px solid var(--line);background:var(--panel);color:var(--ink);
+  border-radius:999px;min-height:42px;min-width:42px;padding:0 11px;
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  font-family:var(--font-display);font-size:15px;
+}
+.icon-btn .ic{font-family:var(--font-emoji);font-size:17px;line-height:1}
+.icon-btn.off{opacity:.5}
+.icon-btn.off::after{content:"";position:absolute;left:9px;right:9px;top:50%;height:2px;background:var(--ink);rotate:-35deg}
+.icon-btn.armed{border-color:var(--red);color:var(--red-edge)}
+.music-on #musicBtn{border-color:var(--navy)}
+
+.prompt{
+  appearance:none;border:0;background:none;cursor:pointer;
+  padding:2px 6px;text-align:center;
+  font-family:var(--font-display);font-size:clamp(25px,6.6vw,38px);line-height:1.2;color:var(--ink);
+  text-wrap:balance;
+}
+.prompt .re{font-family:var(--font-emoji);font-size:.55em;opacity:.7;vertical-align:.18em;margin-left:.3em}
+.hints{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%;max-width:760px;margin:0 auto}
+.hint-btn{
+  appearance:none;cursor:pointer;display:grid;justify-items:center;align-content:center;
+  padding:6px 4px;min-height:54px;border-radius:14px;
+  border:2px solid var(--line);background:rgba(255,255,255,.7);color:var(--muted);
+  font-family:var(--font-display);font-size:19px;line-height:1.15;
+  transition:background .25s,color .25s,border-color .25s,opacity .25s;
+}
+.hint-btn small{font-family:var(--font-body);font-size:12.5px;opacity:.9}
+.hint-btn.ready{border-color:var(--navy);color:var(--navy);background:var(--panel)}
+.hint-btn.opened{border-color:transparent;background:var(--navy);color:var(--white)}
+.hint-btn.locked{opacity:.5}
+.hint-btn:disabled{cursor:default}
+.hint-btn.pop{animation:nudge .5s ease-out}
+.tip{margin:0;min-height:1.5em;font-size:15px;color:var(--muted);text-align:center;text-wrap:balance}
+.tip.nudge{animation:nudge .5s ease-out}
+
+.tickets{display:grid;gap:12px;grid-template-columns:minmax(0,1fr);width:100%;max-width:760px;margin:0 auto}
+.ticket{
+  appearance:none;border:0;cursor:pointer;position:relative;padding:0;
+  display:grid;grid-template-columns:auto minmax(0,1fr);align-items:stretch;
+  min-height:64px;border-radius:14px;overflow:hidden;text-align:left;
+  background:var(--paper);color:var(--ink);
+  box-shadow:0 3px 0 var(--paper-edge),0 10px 20px var(--shadow);
+  transition:transform .15s,box-shadow .15s,filter .3s,opacity .3s;
+}
+.ticket:active{transform:translateY(3px)}
+.ticket .stub{
+  width:clamp(44px,11vw,62px);display:grid;place-items:center;
+  background:repeating-linear-gradient(135deg,var(--band) 0 9px,var(--paper) 9px 18px);
+  border-right:2px dashed var(--paper-edge);
+}
+.ticket .no{
+  width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+  background:var(--paper);color:var(--band);box-shadow:0 0 0 2px var(--band);
+  font-family:var(--font-mono);font-weight:600;font-size:15px;
+}
+.ticket .city{display:flex;flex-direction:column;justify-content:center;padding:6px 16px;min-width:0}
+.ticket .city small{font-family:var(--font-display);font-size:12px;letter-spacing:.08em;color:var(--muted)}
+.ticket .city b{font-family:var(--font-display);font-weight:400;font-size:clamp(25px,6.8vw,38px);line-height:1.12;overflow-wrap:anywhere}
+.ticket .city b.long{font-size:clamp(19px,4.8vw,28px)}
+.ticket.reading{transform:translateY(-4px);box-shadow:0 0 0 4px var(--band),0 3px 0 var(--paper-edge),0 16px 26px var(--shadow)}
+.ticket .stamp{
+  position:absolute;right:14px;top:50%;translate:0 -50%;rotate:-12deg;
+  padding:1px 10px;border:3px solid currentColor;border-radius:10px;
+  font-family:var(--font-display);font-size:22px;line-height:1.3;
+  opacity:0;scale:1.9;pointer-events:none;
+  transition:opacity .2s,scale .3s cubic-bezier(.2,1.4,.4,1);
+}
+.ticket.wrong{filter:grayscale(.85);opacity:.6;cursor:default}
+.ticket.wrong .stamp{color:var(--red);opacity:.95;scale:1}
+.ticket.right{box-shadow:0 0 0 4px var(--green),0 3px 0 var(--paper-edge),0 16px 26px var(--shadow)}
+.ticket.right .stamp{color:var(--green);opacity:.95;scale:1}
+
+/* ---------- 넘기기 · 결과 ---------- */
+.overlay{
+  position:fixed;inset:0;z-index:30;display:grid;place-items:center;
+  padding:calc(24px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  background:var(--veil);color:var(--white);
+}
+.turn-inner{display:grid;justify-items:center;gap:12px;text-align:center;max-width:420px}
+.turn-avatar{font-family:var(--font-emoji);font-size:84px;line-height:1;animation:hop 1s ease-in-out infinite}
+.turn-name{margin:0;font-family:var(--font-display);font-size:clamp(34px,9vw,48px);line-height:1.15}
+.turn-mode{margin:0;font-family:var(--font-display);font-size:20px;color:var(--flap-ink)}
+.turn-sub{margin:0;color:var(--line)}
+
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:center;pointer-events:none;
+  padding:0 max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+}
+.sheet-inner{
+  pointer-events:auto;width:min(100%,520px);display:grid;justify-items:center;gap:8px;text-align:center;
+  padding:18px 18px 20px;border-radius:26px;background:var(--paper);border:2px solid var(--paper-edge);
+  box-shadow:0 -10px 50px var(--shadow);animation:rise .45s cubic-bezier(.2,1.3,.4,1);
+}
+.sheet-top{display:flex;align-items:center;justify-content:center;gap:16px}
+.sheet-stars{display:flex;gap:4px;font-size:34px;line-height:1}
+.sheet-stars span{color:var(--line)}
+.sheet-stars span.on{color:var(--orange)}
+.sheet-line{margin:0;font-family:var(--font-display);font-size:clamp(24px,6.4vw,32px);line-height:1.25;color:var(--ink);text-wrap:balance}
+.sheet-line b{font-weight:400;color:var(--red)}
+.sheet-fact{margin:0;font-size:16px;color:var(--muted);text-wrap:balance}
+#stopBtn{border-style:solid;border-color:var(--line)}
+
+/* 여권 도장 */
+.pstamp{
+  --size:92px;
+  position:relative;flex:0 0 auto;width:var(--size);aspect-ratio:1;border-radius:50%;
+  display:grid;place-content:center;justify-items:center;gap:2px;
+  color:var(--ink-c);border:3px double var(--ink-c);rotate:var(--rot);
+  background:radial-gradient(circle,transparent 60%,rgba(255,255,255,.4) 61%);
+}
+.pstamp::before{content:"";position:absolute;inset:6px;border-radius:50%;border:1px dashed var(--ink-c);opacity:.6}
+.pstamp .pf{font-family:var(--font-flag);font-size:calc(var(--size) * .36);line-height:1}
+.pstamp .pc{font-family:var(--font-display);font-size:calc(var(--size) * .15);line-height:1.1;max-width:calc(var(--size) * .78);text-align:center;overflow-wrap:anywhere}
+.pstamp .pc.long{font-size:calc(var(--size) * .11)}
+.pstamp .pd{font-family:var(--font-mono);font-weight:600;font-size:calc(var(--size) * .1);letter-spacing:.12em}
+.pstamp.big{--size:104px;animation:stampIn .5s cubic-bezier(.2,1.4,.4,1) both}
+
+.end{align-items:center;text-align:center;gap:18px;padding-top:20px;max-width:620px;margin:0 auto;width:100%}
+.end-title{margin:0;font-family:var(--font-display);font-weight:400;font-size:clamp(36px,9vw,54px);line-height:1.1;text-wrap:balance;color:var(--navy)}
+.end-sub{margin:0;color:var(--muted);font-size:17px}
+.passports{display:grid;gap:16px;width:100%}
+.passport{border-radius:20px;overflow:hidden;background:var(--paper);box-shadow:0 0 0 1px var(--paper-edge),0 14px 30px var(--shadow);text-align:left}
+.pp-cover{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--navy);color:var(--white)}
+.pp-cover .av{font-family:var(--font-emoji);font-size:36px;line-height:1}
+.pp-cover .nm{flex:1;min-width:0;font-family:var(--font-display);font-size:24px;line-height:1.15}
+.pp-cover .nm small{display:block;font-family:var(--font-mono);font-weight:500;font-size:11px;letter-spacing:.2em;color:var(--gold)}
+.pp-cover .st{font-family:var(--font-display);font-size:26px;color:var(--gold);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pp-page{display:grid;gap:8px;padding:16px;background-image:repeating-linear-gradient(0deg,transparent 0 27px,rgba(29,47,94,.06) 27px 28px)}
+.pp-stamps{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.pp-stamps .pstamp{--size:84px}
+.pp-stamps.many{gap:6px}
+.pp-stamps.many .pstamp{--size:58px}
+.pp-stamps.many .pc,.pp-stamps.many .pd{display:none}
+.pp-count{margin:0;text-align:center;font-family:var(--font-display);font-size:18px;color:var(--muted)}
+.trip{display:grid;gap:6px;width:100%;padding:12px 16px;border-radius:16px;background:rgba(255,255,255,.72);border:1px solid var(--line);text-align:left}
+.trip-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-family:var(--font-display);font-size:17px}
+.trip-top b{font-weight:400;color:var(--navy);font-variant-numeric:tabular-nums}
+.trip-track{position:relative;height:24px;margin-inline:11px}
+.trip-track::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:2px dashed var(--line)}
+.trip-fill{position:absolute;left:0;top:50%;height:4px;margin-top:-2px;border-radius:2px;background:var(--red);width:var(--p)}
+.trip-plane{position:absolute;top:50%;left:var(--p);width:24px;height:24px;translate:-50% -50%;fill:var(--navy)}
+.trip-note{margin:0;font-size:13.5px;color:var(--muted)}
+.end-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center}
+
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:25;overflow:hidden}
+.confetti i{position:absolute;top:-24px;width:10px;height:16px;border-radius:3px;background:var(--c);animation:fall var(--dur) linear forwards}
+
+/* ---------- 폭 ---------- */
+@media (min-width:640px){
+  .tickets{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tickets[data-n="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .ticket{min-height:92px}
+  .ticket .city b{font-size:clamp(26px,4.2vw,38px)}
+  .ticket .city b.long{font-size:clamp(19px,2.8vw,26px)}
+  .tickets[data-n="3"] .ticket .city{padding-inline:12px}
+}
+@media (max-width:520px){
+  .how li{font-size:14px}
+  .score .nm{display:none}
+  .icon-btn .lbl{display:none}
+  .icon-btn.armed .lbl{display:inline}
+}
+
+/* ---------- 움직임 ---------- */
+@keyframes drift{from{transform:translateX(-45vw)}to{transform:translateX(140vw)}}
+@keyframes fly{0%{opacity:1;transform:translate(-90px,60px) rotate(-10deg)}100%{opacity:1;transform:translate(calc(100vw + 40px),-40px) rotate(-10deg)}}
+@keyframes flip{0%{transform:rotateX(0)}50%{transform:rotateX(-80deg)}100%{transform:rotateX(0)}}
+@keyframes blink{to{visibility:hidden}}
+@keyframes bobA{0%{transform:none}35%{transform:translate(-3%,-8%) scale(1.06)}100%{transform:none}}
+@keyframes bobB{0%{transform:none}35%{transform:translate(3%,-8%) scale(1.06)}100%{transform:none}}
+@keyframes shake{0%,100%{translate:0 0}20%{translate:-10px 0}40%{translate:9px 0}60%{translate:-6px 0}80%{translate:4px 0}}
+@keyframes nudge{0%{scale:1}40%{scale:1.06;color:var(--red-edge)}100%{scale:1}}
+@keyframes rise{from{translate:0 40px;opacity:0}to{translate:0 0;opacity:1}}
+@keyframes hop{0%,100%{translate:0 0}50%{translate:0 -12px}}
+@keyframes stampIn{0%{scale:2.2;opacity:0}60%{scale:.94;opacity:1}100%{scale:1;opacity:1}}
+@keyframes fall{to{transform:translate(var(--dx),112vh) rotate(var(--rot))}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .cloud{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="sky-deco" aria-hidden="true">
+  <i class="cloud" style="--y:7%;--w:150px;--d:95s;--dl:-20s"></i>
+  <i class="cloud" style="--y:22%;--w:100px;--d:75s;--dl:-55s"></i>
+  <i class="cloud" style="--y:46%;--w:190px;--d:120s;--dl:-80s"></i>
+  <i class="cloud" style="--y:70%;--w:120px;--d:88s;--dl:-10s"></i>
+</div>
+<div class="jet" id="jet" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 13.2H14L9.5 20H7.6L10 13.2H5.2L3.6 15.5H2.2L3.2 12L2.2 8.5H3.6L5.2 10.8H10L7.6 4H9.5L14 10.8H21A1.2 1.2 0 0 1 21 13.2Z"/></svg></div>
+
+<main class="app">
+  <!-- 시작 화면 -->
+  <section class="screen setup" id="setup">
+    <header class="hero">
+      <h1 class="title-board" id="titleBoard" aria-label="세계 수도 여행"></h1>
+      <p class="lede">비행기를 타고 세계 여러 나라로 떠나요. 나라의 수도를 맞히면 여권에 도장을 쾅 찍어 줘요.</p>
+      <p class="example" aria-label="예시: 프랑스의 수도는 파리">
+        <span class="q"><span class="flag" aria-hidden="true">🇫🇷</span>프랑스의 수도는?</span>
+        <span class="arrow" aria-hidden="true">→</span>
+        <span class="mini-ticket"><span class="stub" aria-hidden="true"></span><b>파리</b></span>
+      </p>
+      <ol class="how">
+        <li><span><b>안내 방송</b>을 들어요</span></li>
+        <li><span>모르면 <b>힌트</b>를 눌러요</span></li>
+        <li><span><b>탑승권</b>을 고르면 도장 쾅!</span></li>
+      </ol>
+      <div class="trip" id="tripSetup"></div>
+    </header>
+
+    <div class="panel">
+      <h2>누가 여행할까요?</h2>
+      <div class="players" id="players"></div>
+      <button type="button" class="ghost" id="togglePlayer">+ 한 명 더</button>
+      <p class="help" id="levelHelp"></p>
+      <div class="row-setting">
+        <span class="label">한 판에 풀 문제</span>
+        <div class="seg seg-count" id="perPlayer" role="radiogroup" aria-label="한 판에 풀 문제 수">
+          <button type="button" role="radio" data-n="10" aria-checked="false">10문제</button>
+          <button type="button" role="radio" data-n="30" aria-checked="false">30문제</button>
+          <button type="button" role="radio" data-n="70" aria-checked="true">70문제</button>
+          <button type="button" role="radio" data-n="194" aria-checked="false">모든 나라<small>194문제</small></button>
+        </div>
+      </div>
+      <label class="check"><input type="checkbox" id="voiceOn" checked> 문제와 보기를 소리로 읽어 줘요</label>
+      <div class="row-setting">
+        <label class="check"><input type="checkbox" id="musicOn" checked> 여행 음악 틀기</label>
+        <button type="button" class="ghost small" id="previewBtn">▶ 음악 들어 보기</button>
+      </div>
+      <p class="note" id="ttsNote" hidden></p>
+    </div>
+
+    <div class="start-actions">
+      <button type="button" class="resume" id="resumeBtn" hidden>이어서 하기</button>
+      <button type="button" class="cta" id="startBtn">출발!</button>
+    </div>
+  </section>
+
+  <!-- 게임 화면 -->
+  <section class="screen play" id="play" hidden>
+    <div class="topbar">
+      <div class="scores" id="scores"></div>
+      <div class="top-actions">
+        <span class="progress" id="progress"></span>
+        <button type="button" class="icon-btn" id="musicBtn" aria-label="음악 끄기" aria-pressed="true"><span class="ic" aria-hidden="true">🎵</span></button>
+        <button type="button" class="icon-btn" id="voiceBtn" aria-label="소리 끄기" aria-pressed="true"><span class="ic" aria-hidden="true">🔊</span></button>
+        <button type="button" class="icon-btn" id="homeBtn" aria-label="처음으로"><span class="ic" aria-hidden="true">🏠</span><span class="lbl">처음으로</span></button>
+      </div>
+    </div>
+
+    <div class="board" id="board">
+      <div class="board-head">
+        <span class="bh-left"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 13.2H14L9.5 20H7.6L10 13.2H5.2L3.6 15.5H2.2L3.2 12L2.2 8.5H3.6L5.2 10.8H10L7.6 4H9.5L14 10.8H21A1.2 1.2 0 0 1 21 13.2Z"/></svg>출발 · 인천 <span class="code">ICN</span></span>
+        <span class="status" id="status">탑승 중</span>
+      </div>
+      <div class="board-grid">
+        <span class="row-label">도착 나라 <span class="cont" id="cont"></span></span>
+        <span class="flagbox"><span class="flag" id="flag"></span></span>
+        <div class="tiles" id="countryTiles"></div>
+        <span class="row-label">수도</span>
+        <span aria-hidden="true"></span>
+        <div class="tiles" id="capitalTiles"></div>
+      </div>
+    </div>
+
+    <button type="button" class="prompt" id="prompt"><span id="promptText"></span><span class="re" aria-hidden="true">🔈</span></button>
+    <div class="hints" id="hints" role="group" aria-label="힌트">
+      <button type="button" class="hint-btn" data-k="1">힌트 1<small>글자 수</small></button>
+      <button type="button" class="hint-btn" data-k="2">힌트 2<small>첫 글자</small></button>
+      <button type="button" class="hint-btn" data-k="3">힌트 3<small>초성</small></button>
+    </div>
+    <p class="tip" id="tip" aria-live="polite"></p>
+    <div class="tickets" id="tickets"></div>
+  </section>
+
+  <!-- 끝 화면 -->
+  <section class="screen end" id="end" hidden>
+    <h2 class="end-title">여행 끝! 모두 잘했어요</h2>
+    <p class="end-sub">여권에 찍은 도장을 함께 세어 봐요.</p>
+    <div class="passports" id="passports"></div>
+    <div class="trip" id="tripEnd"></div>
+    <div class="end-actions">
+      <button type="button" class="cta" id="againBtn">한 번 더 여행하기</button>
+      <button type="button" class="ghost" id="setupBtn">처음 화면으로</button>
+    </div>
+  </section>
+</main>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-inner">
+    <div class="sheet-top">
+      <div id="sheetStamp"></div>
+      <div class="sheet-stars" id="sheetStars"></div>
+    </div>
+    <p class="sheet-line" id="sheetLine"></p>
+    <p class="sheet-fact" id="sheetFact"></p>
+    <button type="button" class="cta" id="nextBtn">다음 여행</button>
+    <button type="button" class="ghost small" id="stopBtn">여기까지 할래요</button>
+  </div>
+</div>
+
+<div class="overlay" id="turnCard" hidden>
+  <div class="turn-inner">
+    <div class="turn-avatar" id="turnAvatar"></div>
+    <p class="turn-name" id="turnName"></p>
+    <p class="turn-mode" id="turnMode"></p>
+    <p class="turn-sub">화면을 건네주고 버튼을 눌러요</p>
+    <button type="button" class="cta" id="turnGo">준비됐어요!</button>
+  </div>
+</div>
+
+<div class="confetti" id="confetti" aria-hidden="true"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  /*<gen>*/
+  // 유엔 회원국 193곳과 바티칸까지 194개 나라예요. 수도 표기는 외교부 국가정보를 따랐어요.
+  // [국가 코드, 나라, 수도, 대륙]
+  const RAW = [
+    ['KR', '대한민국', '서울', '아시아'],
+    ['JP', '일본', '도쿄', '아시아'],
+    ['CN', '중국', '베이징', '아시아'],
+    ['MN', '몽골', '울란바토르', '아시아'],
+    ['VN', '베트남', '하노이', '아시아'],
+    ['TH', '태국', '방콕', '아시아'],
+    ['PH', '필리핀', '마닐라', '아시아'],
+    ['SG', '싱가포르', '싱가포르', '아시아'],
+    ['IN', '인도', '뉴델리', '아시아'],
+    ['TR', '튀르키예', '앙카라', '아시아'],
+    ['ID', '인도네시아', '자카르타', '아시아'],
+    ['MY', '말레이시아', '쿠알라룸푸르', '아시아'],
+    ['KH', '캄보디아', '프놈펜', '아시아'],
+    ['LA', '라오스', '비엔티안', '아시아'],
+    ['MM', '미얀마', '네피도', '아시아'],
+    ['NP', '네팔', '카트만두', '아시아'],
+    ['KP', '북한', '평양', '아시아'],
+    ['KZ', '카자흐스탄', '아스타나', '아시아'],
+    ['UZ', '우즈베키스탄', '타슈켄트', '아시아'],
+    ['PK', '파키스탄', '이슬라마바드', '아시아'],
+    ['BD', '방글라데시', '다카', '아시아'],
+    ['SA', '사우디아라비아', '리야드', '아시아'],
+    ['AE', '아랍에미리트', '아부다비', '아시아'],
+    ['IR', '이란', '테헤란', '아시아'],
+    ['IQ', '이라크', '바그다드', '아시아'],
+    ['QA', '카타르', '도하', '아시아'],
+    ['BN', '브루나이', '반다르스리브가완', '아시아'],
+    ['TL', '동티모르', '딜리', '아시아'],
+    ['BT', '부탄', '팀푸', '아시아'],
+    ['MV', '몰디브', '말레', '아시아'],
+    ['LK', '스리랑카', '스리자야와르데네푸라코테', '아시아'],
+    ['AF', '아프가니스탄', '카불', '아시아'],
+    ['TM', '투르크메니스탄', '아시가바트', '아시아'],
+    ['KG', '키르기스스탄', '비슈케크', '아시아'],
+    ['TJ', '타지키스탄', '두샨베', '아시아'],
+    ['GE', '조지아', '트빌리시', '아시아'],
+    ['AM', '아르메니아', '예레반', '아시아'],
+    ['AZ', '아제르바이잔', '바쿠', '아시아'],
+    ['SY', '시리아', '다마스쿠스', '아시아'],
+    ['LB', '레바논', '베이루트', '아시아'],
+    ['JO', '요르단', '암만', '아시아'],
+    ['YE', '예멘', '사나', '아시아'],
+    ['OM', '오만', '무스카트', '아시아'],
+    ['BH', '바레인', '마나마', '아시아'],
+    ['KW', '쿠웨이트', '쿠웨이트시티', '아시아'],
+    ['IL', '이스라엘', '예루살렘', '아시아'],
+
+    ['GB', '영국', '런던', '유럽'],
+    ['FR', '프랑스', '파리', '유럽'],
+    ['DE', '독일', '베를린', '유럽'],
+    ['IT', '이탈리아', '로마', '유럽'],
+    ['ES', '스페인', '마드리드', '유럽'],
+    ['GR', '그리스', '아테네', '유럽'],
+    ['RU', '러시아', '모스크바', '유럽'],
+    ['NL', '네덜란드', '암스테르담', '유럽'],
+    ['CH', '스위스', '베른', '유럽'],
+    ['PT', '포르투갈', '리스본', '유럽'],
+    ['BE', '벨기에', '브뤼셀', '유럽'],
+    ['AT', '오스트리아', '빈', '유럽'],
+    ['SE', '스웨덴', '스톡홀름', '유럽'],
+    ['NO', '노르웨이', '오슬로', '유럽'],
+    ['FI', '핀란드', '헬싱키', '유럽'],
+    ['DK', '덴마크', '코펜하겐', '유럽'],
+    ['IE', '아일랜드', '더블린', '유럽'],
+    ['PL', '폴란드', '바르샤바', '유럽'],
+    ['CZ', '체코', '프라하', '유럽'],
+    ['HU', '헝가리', '부다페스트', '유럽'],
+    ['UA', '우크라이나', '키이우', '유럽'],
+    ['IS', '아이슬란드', '레이캬비크', '유럽'],
+    ['HR', '크로아티아', '자그레브', '유럽'],
+    ['LU', '룩셈부르크', '룩셈부르크', '유럽'],
+    ['LI', '리히텐슈타인', '파두츠', '유럽'],
+    ['MC', '모나코', '모나코', '유럽'],
+    ['AD', '안도라', '안도라라벨랴', '유럽'],
+    ['SM', '산마리노', '산마리노', '유럽'],
+    ['MT', '몰타', '발레타', '유럽'],
+    ['CY', '키프로스', '니코시아', '유럽'],
+    ['EE', '에스토니아', '탈린', '유럽'],
+    ['LV', '라트비아', '리가', '유럽'],
+    ['LT', '리투아니아', '빌뉴스', '유럽'],
+    ['SK', '슬로바키아', '브라티슬라바', '유럽'],
+    ['SI', '슬로베니아', '류블랴나', '유럽'],
+    ['BA', '보스니아헤르체고비나', '사라예보', '유럽'],
+    ['RS', '세르비아', '베오그라드', '유럽'],
+    ['ME', '몬테네그로', '포드고리차', '유럽'],
+    ['MK', '북마케도니아', '스코페', '유럽'],
+    ['AL', '알바니아', '티라나', '유럽'],
+    ['BG', '불가리아', '소피아', '유럽'],
+    ['RO', '루마니아', '부쿠레슈티', '유럽'],
+    ['MD', '몰도바', '키시나우', '유럽'],
+    ['BY', '벨라루스', '민스크', '유럽'],
+    ['VA', '바티칸', '바티칸시티', '유럽'],
+
+    ['EG', '이집트', '카이로', '아프리카'],
+    ['KE', '케냐', '나이로비', '아프리카'],
+    ['ZA', '남아프리카공화국', '프리토리아', '아프리카'],
+    ['MA', '모로코', '라바트', '아프리카'],
+    ['NG', '나이지리아', '아부자', '아프리카'],
+    ['ET', '에티오피아', '아디스아바바', '아프리카'],
+    ['GH', '가나', '아크라', '아프리카'],
+    ['TZ', '탄자니아', '도도마', '아프리카'],
+    ['SN', '세네갈', '다카르', '아프리카'],
+    ['MG', '마다가스카르', '안타나나리보', '아프리카'],
+    ['DZ', '알제리', '알제', '아프리카'],
+    ['LY', '리비아', '트리폴리', '아프리카'],
+    ['TN', '튀니지', '튀니스', '아프리카'],
+    ['MR', '모리타니', '누악쇼트', '아프리카'],
+    ['ML', '말리', '바마코', '아프리카'],
+    ['NE', '니제르', '니아메', '아프리카'],
+    ['TD', '차드', '은자메나', '아프리카'],
+    ['SD', '수단', '하르툼', '아프리카'],
+    ['SS', '남수단', '주바', '아프리카'],
+    ['ER', '에리트레아', '아스마라', '아프리카'],
+    ['DJ', '지부티', '지부티', '아프리카'],
+    ['SO', '소말리아', '모가디슈', '아프리카'],
+    ['UG', '우간다', '캄팔라', '아프리카'],
+    ['RW', '르완다', '키갈리', '아프리카'],
+    ['BI', '부룬디', '기테가', '아프리카'],
+    ['GM', '감비아', '반줄', '아프리카'],
+    ['GW', '기니비사우', '비사우', '아프리카'],
+    ['GN', '기니', '코나크리', '아프리카'],
+    ['SL', '시에라리온', '프리타운', '아프리카'],
+    ['LR', '라이베리아', '몬로비아', '아프리카'],
+    ['CI', '코트디부아르', '야무수크로', '아프리카'],
+    ['BF', '부르키나파소', '와가두구', '아프리카'],
+    ['TG', '토고', '로메', '아프리카'],
+    ['BJ', '베냉', '포르토노보', '아프리카'],
+    ['CM', '카메룬', '야운데', '아프리카'],
+    ['CF', '중앙아프리카공화국', '방기', '아프리카'],
+    ['GQ', '적도기니', '시우다드데라파스', '아프리카'],
+    ['GA', '가봉', '리브르빌', '아프리카'],
+    ['CG', '콩고공화국', '브라자빌', '아프리카'],
+    ['CD', '콩고민주공화국', '킨샤사', '아프리카'],
+    ['AO', '앙골라', '루안다', '아프리카'],
+    ['ZM', '잠비아', '루사카', '아프리카'],
+    ['MW', '말라위', '릴롱궤', '아프리카'],
+    ['MZ', '모잠비크', '마푸투', '아프리카'],
+    ['ZW', '짐바브웨', '하라레', '아프리카'],
+    ['BW', '보츠와나', '가보로네', '아프리카'],
+    ['NA', '나미비아', '빈트후크', '아프리카'],
+    ['LS', '레소토', '마세루', '아프리카'],
+    ['SZ', '에스와티니', '음바바네', '아프리카'],
+    ['MU', '모리셔스', '포트루이스', '아프리카'],
+    ['SC', '세이셸', '빅토리아', '아프리카'],
+    ['KM', '코모로', '모로니', '아프리카'],
+    ['CV', '카보베르데', '프라이아', '아프리카'],
+    ['ST', '상투메프린시페', '상투메', '아프리카'],
+
+    ['US', '미국', '워싱턴 D.C.', '북아메리카'],
+    ['CA', '캐나다', '오타와', '북아메리카'],
+    ['MX', '멕시코', '멕시코시티', '북아메리카'],
+    ['CU', '쿠바', '아바나', '북아메리카'],
+    ['JM', '자메이카', '킹스턴', '북아메리카'],
+    ['PA', '파나마', '파나마시티', '북아메리카'],
+    ['GT', '과테말라', '과테말라시티', '북아메리카'],
+    ['BZ', '벨리즈', '벨모판', '북아메리카'],
+    ['SV', '엘살바도르', '산살바도르', '북아메리카'],
+    ['HN', '온두라스', '테구시갈파', '북아메리카'],
+    ['NI', '니카라과', '마나과', '북아메리카'],
+    ['CR', '코스타리카', '산호세', '북아메리카'],
+    ['HT', '아이티', '포르토프랭스', '북아메리카'],
+    ['DO', '도미니카공화국', '산토도밍고', '북아메리카'],
+    ['BS', '바하마', '나소', '북아메리카'],
+    ['BB', '바베이도스', '브리지타운', '북아메리카'],
+    ['TT', '트리니다드토바고', '포트오브스페인', '북아메리카'],
+    ['GD', '그레나다', '세인트조지스', '북아메리카'],
+    ['LC', '세인트루시아', '캐스트리스', '북아메리카'],
+    ['VC', '세인트빈센트그레나딘', '킹스타운', '북아메리카'],
+    ['AG', '앤티가바부다', '세인트존스', '북아메리카'],
+    ['DM', '도미니카연방', '로조', '북아메리카'],
+    ['KN', '세인트키츠네비스', '바스테르', '북아메리카'],
+
+    ['BR', '브라질', '브라질리아', '남아메리카'],
+    ['AR', '아르헨티나', '부에노스아이레스', '남아메리카'],
+    ['CL', '칠레', '산티아고', '남아메리카'],
+    ['PE', '페루', '리마', '남아메리카'],
+    ['CO', '콜롬비아', '보고타', '남아메리카'],
+    ['UY', '우루과이', '몬테비데오', '남아메리카'],
+    ['VE', '베네수엘라', '카라카스', '남아메리카'],
+    ['EC', '에콰도르', '키토', '남아메리카'],
+    ['BO', '볼리비아', '수크레', '남아메리카'],
+    ['PY', '파라과이', '아순시온', '남아메리카'],
+    ['GY', '가이아나', '조지타운', '남아메리카'],
+    ['SR', '수리남', '파라마리보', '남아메리카'],
+
+    ['AU', '호주', '캔버라', '오세아니아'],
+    ['NZ', '뉴질랜드', '웰링턴', '오세아니아'],
+    ['FJ', '피지', '수바', '오세아니아'],
+    ['PG', '파푸아뉴기니', '포트모르즈비', '오세아니아'],
+    ['SB', '솔로몬제도', '호니아라', '오세아니아'],
+    ['VU', '바누아투', '포트빌라', '오세아니아'],
+    ['WS', '사모아', '아피아', '오세아니아'],
+    ['TO', '통가', '누쿠알로파', '오세아니아'],
+    ['KI', '키리바시', '타라와', '오세아니아'],
+    ['TV', '투발루', '푸나푸티', '오세아니아'],
+    ['MH', '마셜제도', '마주로', '오세아니아'],
+    ['FM', '미크로네시아', '팔리키르', '오세아니아'],
+    ['PW', '팔라우', '응게룰무드', '오세아니아'],
+    ['NR', '나우루', '야렌', '오세아니아'],
+  ];
+  // 소리로 읽을 때 다르게 읽는 수도
+  const SAY = { US: '워싱턴 디씨' };
+  // 수도로 헷갈리기 쉬운 큰 도시 (보기가 3개 이상일 때 섞여 나와요)
+  const TRAP = {
+    KR: '부산', JP: '오사카', CN: '상하이', VN: '호찌민', IN: '뭄바이', TR: '이스탄불', PH: '세부', TH: '치앙마이',
+    AU: '시드니', NZ: '오클랜드', US: '뉴욕', CA: '토론토', BR: '리우데자네이루',
+    CH: '취리히', IT: '밀라노', ES: '바르셀로나', DE: '뮌헨', RU: '상트페테르부르크', NL: '로테르담',
+    EG: '알렉산드리아', MA: '카사블랑카', NG: '라고스', TZ: '다르에스살람',
+    PK: '카라치', AE: '두바이', MM: '양곤', KZ: '알마티', SA: '제다',
+  };
+  // 맞힌 뒤 들려주는 한마디
+  const FACT = {
+    KR: '우리나라의 수도예요. 남산서울타워가 있어요.',
+    JP: '아주 높은 탑, 도쿄 스카이트리가 있어요.',
+    CN: '가까이에 아주 긴 성벽, 만리장성이 있어요.',
+    MN: '둥근 천막집 게르에서 사는 사람들도 있어요.',
+    VN: '쌀국수로 유명해요. 가장 큰 도시는 호찌민이에요.',
+    TH: '코끼리를 아주 아끼는 나라예요.',
+    PH: '7천 개가 넘는 섬으로 이루어진 나라예요.',
+    SG: '나라 이름과 수도 이름이 똑같아요.',
+    IN: '하얀 대리석으로 지은 타지마할이 있는 나라예요.',
+    TR: '가장 큰 도시는 이스탄불이지만, 수도는 앙카라예요.',
+    EG: '가까이에 커다란 피라미드가 있어요.',
+    KE: '도시 바로 옆 국립공원에서 기린과 사자를 볼 수 있어요.',
+    GB: '커다란 시계탑 빅벤이 있어요.',
+    FR: '에펠탑이 있는 도시예요.',
+    DE: '브란덴부르크 문이 유명해요.',
+    IT: '옛날 원형 경기장, 콜로세움이 있어요.',
+    ES: '플라멩코 춤으로 유명한 나라예요.',
+    GR: '올림픽이 처음 시작된 나라예요.',
+    RU: '세계에서 가장 넓은 나라예요.',
+    NL: '풍차와 튤립으로 유명해요. 정부는 헤이그에 있어요.',
+    CH: '높은 알프스산맥이 있는 나라예요.',
+    US: '대통령이 일하는 백악관이 있어요.',
+    CA: '국기에 빨간 단풍잎이 그려져 있어요.',
+    MX: '나라 이름이 수도 이름에 들어 있어요.',
+    BR: '하늘에서 보면 비행기처럼 생긴 도시예요.',
+    AR: '탱고 춤으로 유명한 도시예요.',
+    AU: '캥거루와 코알라가 사는 나라예요.',
+    NZ: '날지 못하는 새, 키위가 살아요.',
+    // 수도가 여러 곳이거나 수도를 옮긴 나라
+    ZA: '수도가 세 곳이에요. 프리토리아, 케이프타운, 블룸폰테인이에요.',
+    BO: '헌법에 정한 수도는 수크레이고, 정부는 라파스에 있어요.',
+    MY: '정부 기관은 푸트라자야에 많이 있어요.',
+    CI: '가장 큰 도시는 아비장이에요.',
+    LK: '가장 큰 도시는 콜롬보예요.',
+    ID: '새 수도 누산타라를 짓고 있어요.',
+    GQ: '2026년 1월에 말라보에서 수도를 옮겼어요.',
+    KZ: '예전 수도는 알마티였어요.',
+    TZ: '가장 큰 도시는 다르에스살람이에요.',
+    NG: '가장 큰 도시는 라고스예요.',
+    MM: '예전 수도는 양곤이었어요.',
+    PK: '가장 큰 도시는 카라치예요.',
+    AE: '두바이는 수도가 아니에요.',
+    MA: '가장 큰 도시는 카사블랑카예요.',
+    BI: '2019년에 부줌부라에서 수도를 옮겼어요.',
+    SZ: '왕실과 의회가 있는 로밤바도 수도 역할을 해요.',
+    BJ: '정부 기관은 코토누에 많이 있어요.',
+    PW: '2006년에 코로르에서 수도를 옮겼어요.',
+    IL: '이스라엘은 예루살렘을 수도로 정했지만, 나라마다 생각이 달라서 많은 나라는 대사관을 텔아비브에 두고 있어요.',
+    NR: '공식 수도는 따로 없고, 정부 기관이 야렌에 있어요.',
+    VA: '세계에서 가장 작은 나라예요. 나라 전체가 도시 하나예요.',
+  };
+  const CONT_INK = { '아시아': 'red', '유럽': 'blue', '아프리카': 'green', '북아메리카': 'purple', '남아메리카': 'orange', '오세아니아': 'teal' };
+
+  const flagOf = code => String.fromCodePoint(...Array.from(code).map(ch => 0x1F1E6 + ch.charCodeAt(0) - 65));
+  const COUNTRIES = RAW.map(([code, name, cap, cont]) => ({ code, name, cap, cont, say: SAY[code] || cap }));
+  const BY_CODE = Object.fromEntries(COUNTRIES.map(c => [c.code, c]));
+  const TOTAL = COUNTRIES.length;
+
+  const rand = n => Math.floor(Math.random() * n);
+  const shuffle = arr => {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = rand(i + 1);
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+  // 보기: 2개면 다른 대륙 수도, 3~4개면 같은 대륙 수도나 헷갈리는 큰 도시도 섞어요.
+  const makeOptions = (entry, n) => {
+    const others = COUNTRIES.filter(c => c.code !== entry.code);
+    const same = shuffle(others.filter(c => c.cont === entry.cont));
+    const far = shuffle(others.filter(c => c.cont !== entry.cont));
+    const trap = n >= 3 ? TRAP[entry.code] || null : null;
+    const room = n - 1 - (trap ? 1 : 0);
+    const wantSame = n === 2 ? 0 : n === 3 ? (trap ? 0 : 1) : (trap ? 1 : 2);
+    const used = new Set([entry.cap, trap]);
+    const picks = [];
+    const take = c => {
+      if (picks.length < room && !used.has(c.cap)) { used.add(c.cap); picks.push(c); }
+    };
+    same.slice(0, wantSame).forEach(take);
+    far.forEach(take);
+    same.forEach(take);
+    const opts = [{ text: entry.cap, say: entry.say, code: entry.code, correct: true }]
+      .concat(picks.map(c => ({ text: c.cap, say: c.say, code: c.code, correct: false })));
+    if (trap) opts.push({ text: trap, say: trap, code: null, trap: true, correct: false });
+    return shuffle(opts);
+  };
+  // 한 번 나온 나라는 모든 나라가 다 나올 때까지 다시 나오지 않아요
+  const drawCountry = asked => {
+    let cands = COUNTRIES.filter(c => !asked.includes(c.code));
+    if (!cands.length) { asked.length = 0; cands = COUNTRIES; }
+    const pick = cands[rand(cands.length)];
+    asked.push(pick.code);
+    return pick;
+  };
+
+  // 받침에 따라 조사를 골라요 (프랑스로 / 일본으로 / 브라질로)
+  const lastCode = w => w.charCodeAt(w.length - 1) - 0xAC00;
+  const hasBatchim = w => { const c = lastCode(w); return c >= 0 && c <= 11171 && c % 28 !== 0; };
+  const rieul = w => { const c = lastCode(w); return c >= 0 && c <= 11171 && c % 28 === 8; };
+  const euro = w => (hasBatchim(w) && !rieul(w) ? '으로' : '로');
+  const eunneun = w => (hasBatchim(w) ? '은' : '는');
+  const copula = w => (hasBatchim(w) ? '이에요' : '예요');
+  const NAT_DET = ['', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉'];
+  const TENS = ['', '열', '스물', '서른', '마흔', '쉰'];
+  const natDet = n => (n === 0 ? '영' : n === 20 ? '스무' : TENS[Math.floor(n / 10)] + NAT_DET[n % 10]);
+
+  const questionText = e => `${e.name}의 수도는 어디일까요?`;
+  const rightSpeech = e => `딩동댕! ${e.name}의 수도는 ${e.say}${copula(e.say)}!${FACT[e.code] ? ' ' + FACT[e.code] : ''}`;
+  const wrongLine = (o, e, speech) => {
+    const w = speech ? o.say : o.text;
+    return o.trap
+      ? `${w}${eunneun(o.say)} ${e.name}에서 큰 도시지만, 수도는 아니에요.`
+      : `${w}${eunneun(o.say)} ${BY_CODE[o.code].name}의 수도예요.`;
+  };
+  const tileChars = text => Array.from(text.replace(/[\s.]/g, ''));
+  // 힌트: 1 글자 수, 2 첫 글자, 3 초성
+  const CHO = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+  const CHO_NAME = ['기역', '쌍기역', '니은', '디귿', '쌍디귿', '리을', '미음', '비읍', '쌍비읍', '시옷', '쌍시옷', '이응', '지읒', '쌍지읒', '치읓', '키읔', '티읕', '피읖', '히읗'];
+  const LATIN_SAY = { D: '디', C: '씨' };
+  const syl = ch => { const c = ch.charCodeAt(0) - 0xAC00; return c >= 0 && c <= 11171 ? c : -1; };
+  const choOf = ch => (syl(ch) >= 0 ? CHO[Math.floor(syl(ch) / 588)] : ch);
+  const choSay = ch => (syl(ch) >= 0 ? CHO_NAME[Math.floor(syl(ch) / 588)] : (LATIN_SAY[ch] || ch));
+  // 열린 힌트 수에 따라 안내판 수도 칸에 보일 [글자, 종류]
+  const hintTiles = (e, opened) => tileChars(e.cap).map((ch, i) =>
+    (opened >= 2 && i === 0 ? [ch, 'hint'] : opened >= 3 ? [choOf(ch), 'hint'] : ['?', 'q']));
+  const hintText = (e, k) => {
+    const chars = tileChars(e.cap);
+    if (k === 1) return { show: `수도 이름은 ${chars.length}글자예요.`, say: `수도 이름은 ${natDet(chars.length)} 글자예요.` };
+    if (k === 2) return { show: `‘${chars[0]}’ 자로 시작해요.`, say: `${LATIN_SAY[chars[0]] || chars[0]} 자로 시작해요.` };
+    const names = chars.map(choSay);
+    const tail = copula(names[names.length - 1]);
+    return { show: `초성은 ‘${chars.map(choOf).join(' ')}’${tail}.`, say: `초성은 ${names.join(', ')}${tail}.` };
+  };
+  /*</gen>*/
+
+  const AVATARS = ['🐻', '🦊'];
+  const NAMES = ['첫째', '둘째'];
+  const BANDS = ['red', 'blue', 'green', 'orange'];
+  const STAR_MSG = ['', '끝까지 찾아냈어요. 멋져요!', '힌트 하나로 맞혔어요. 잘했어요!', '힌트 없이 한 번에 맞혔어요. 최고예요!'];
+  const FLIP_CHARS = Array.from('가나다라마바사아자차카타파하도로모보소오조코토포호리미시치키티피히');
+  const STORE_KEY = 'world-capital-trip-v1';
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  const replay = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+  const reduced = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  /* ---------- 설정 ---------- */
+  const defaults = () => ({
+    count: 2,
+    total: 70,
+    voice: true,
+    music: true,
+    players: [
+      { name: NAMES[0], choices: 3 },
+      { name: NAMES[1], choices: 2 },
+    ],
+  });
+  function sanitize(s) {
+    const d = defaults();
+    if (!s || typeof s !== 'object') return d;
+    return {
+      count: s.count === 1 ? 1 : 2,
+      total: [10, 30, 70, TOTAL].includes(s.total) ? s.total : 70,
+      voice: s.voice !== false,
+      music: s.music !== false,
+      players: d.players.map((p, i) => {
+        const q = (Array.isArray(s.players) && s.players[i]) || {};
+        return {
+          name: typeof q.name === 'string' ? q.name.slice(0, 8) : p.name,
+          choices: [2, 3, 4].includes(q.choices) ? q.choices : p.choices,
+        };
+      }),
+    };
+  }
+  const state = { screen: 'setup', settings: defaults(), game: null };
+  function loadSettings() {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (raw) state.settings = sanitize(JSON.parse(raw));
+    } catch (e) { /* 저장소를 못 쓰면 기본값으로 */ }
+  }
+  function saveSettings() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state.settings)); } catch (e) { /* 무시 */ }
+  }
+  // 이 기기에서 나온 나라(돌림 순서)와 맞힌 나라(세계 일주)를 기억해요
+  const PROGRESS_KEY = 'world-capital-trip-progress-v1';
+  const progress = { asked: [], visited: [] };
+  function loadProgress() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(PROGRESS_KEY) || 'null');
+      if (raw && typeof raw === 'object') {
+        const keep = list => (Array.isArray(list) ? list.filter((c, i) => BY_CODE[c] && list.indexOf(c) === i) : []);
+        progress.asked = keep(raw.asked);
+        progress.visited = keep(raw.visited);
+      }
+    } catch (e) { /* 저장소를 못 쓰면 이번 여행만 기억해요 */ }
+  }
+  function saveProgress() {
+    try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); } catch (e) { /* 무시 */ }
+  }
+  // 긴 판은 화면이 꺼지거나 새로 열려도 이어서 할 수 있게 기억해요
+  const GAME_KEY = 'world-capital-trip-game-v1';
+  let savedGame = null;
+  const validGame = g => !!(g && Array.isArray(g.players) && g.players.length && g.current && BY_CODE[g.current.code]
+    && Array.isArray(g.current.options) && typeof g.done === 'number' && typeof g.total === 'number' && g.done < g.total);
+  function loadGame() {
+    try {
+      const g = JSON.parse(localStorage.getItem(GAME_KEY) || 'null');
+      savedGame = validGame(g) ? g : null;
+    } catch (e) { savedGame = null; }
+  }
+  function saveGame() {
+    try { if (state.game) localStorage.setItem(GAME_KEY, JSON.stringify(state.game)); } catch (e) { /* 무시 */ }
+  }
+  function clearGame() {
+    savedGame = null;
+    try { localStorage.removeItem(GAME_KEY); } catch (e) { /* 무시 */ }
+  }
+
+  /* ---------- 소리 엔진 ---------- */
+  const BPM = 108;
+  const BEAT = 60 / BPM;
+  const S16 = BEAT / 4;
+  const BAR = BEAT * 4;
+  const MUSIC_VOL = 0.56;
+  const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+  const A = { ctx: null };
+
+  function audio() {
+    if (!A.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* 지원 안 하면 넘어가요 */ }
+      let ctx;
+      try { ctx = new AC(); } catch (e) { return null; }
+      A.ctx = ctx;
+      const comp = ctx.createDynamicsCompressor();
+      comp.threshold.value = -14; comp.knee.value = 10; comp.ratio.value = 3;
+      comp.attack.value = 0.004; comp.release.value = 0.2;
+      A.master = ctx.createGain(); A.master.gain.value = 0.9;
+      A.master.connect(comp).connect(ctx.destination);
+      A.duck = ctx.createGain(); A.duck.gain.value = 1; A.duck.connect(A.master);
+      A.music = ctx.createGain(); A.music.gain.value = 0; A.music.connect(A.duck);
+      A.sfx = ctx.createGain(); A.sfx.gain.value = 0.8; A.sfx.connect(A.master);
+      const len = ctx.sampleRate;
+      A.noise = ctx.createBuffer(1, len, ctx.sampleRate);
+      const data = A.noise.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+      A.shaper = ctx.createWaveShaper();
+      const curve = new Float32Array(1024);
+      for (let i = 0; i < 1024; i++) curve[i] = Math.tanh(1.6 * (i / 511.5 - 1));
+      A.shaper.curve = curve;
+      A.shaper.connect(A.music);
+      // 점 8분음표 메아리
+      A.delay = ctx.createDelay(1);
+      A.delay.delayTime.value = S16 * 3;
+      const fb = ctx.createGain(); fb.gain.value = 0.28;
+      const dlp = ctx.createBiquadFilter(); dlp.type = 'lowpass'; dlp.frequency.value = 3000;
+      const wet = ctx.createGain(); wet.gain.value = 0.3;
+      A.delay.connect(dlp); dlp.connect(fb); fb.connect(A.delay);
+      dlp.connect(wet); wet.connect(A.music);
+    }
+    if (A.ctx.state !== 'running' && A.ctx.state !== 'closed') A.ctx.resume().catch(() => {});
+    return A.ctx;
+  }
+  const noiseSrc = () => { const s = A.ctx.createBufferSource(); s.buffer = A.noise; return s; };
+  const env = (g, t, vol, attack, decay) => {
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + attack + decay);
+  };
+
+  // --- 악기 ---
+  function kick(t, vol) {
+    const c = A.ctx, o = c.createOscillator(), g = c.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(150, t);
+    o.frequency.exponentialRampToValueAtTime(48, t + 0.1);
+    env(g, t, vol, 0.004, 0.3);
+    o.connect(g); g.connect(A.shaper);
+    o.start(t); o.stop(t + 0.36);
+  }
+  function clap(t, vol) {
+    const c = A.ctx, n = noiseSrc(), bp = c.createBiquadFilter(), g = c.createGain();
+    bp.type = 'bandpass'; bp.frequency.value = 1500; bp.Q.value = 0.9;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(vol * 0.25, t + 0.011);
+    g.gain.setValueAtTime(vol, t + 0.013);
+    g.gain.exponentialRampToValueAtTime(vol * 0.25, t + 0.024);
+    g.gain.setValueAtTime(vol * 0.9, t + 0.026);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+    n.connect(bp); bp.connect(g); g.connect(A.music);
+    n.start(t, Math.random() * 0.5); n.stop(t + 0.24);
+  }
+  function shaker(t, vol) {
+    const c = A.ctx, n = noiseSrc(), bp = c.createBiquadFilter(), g = c.createGain();
+    bp.type = 'bandpass'; bp.frequency.value = 6800; bp.Q.value = 0.8;
+    env(g, t, vol, 0.006, 0.05);
+    n.connect(bp); bp.connect(g); g.connect(A.music);
+    n.start(t, Math.random() * 0.5); n.stop(t + 0.07);
+  }
+  function snare(t, vol) {
+    const c = A.ctx, n = noiseSrc(), bp = c.createBiquadFilter(), g = c.createGain();
+    bp.type = 'bandpass'; bp.frequency.value = 2200; bp.Q.value = 0.7;
+    env(g, t, vol, 0.002, 0.09);
+    n.connect(bp); bp.connect(g); g.connect(A.music);
+    n.start(t, Math.random() * 0.5); n.stop(t + 0.1);
+  }
+  function crash(t, vol) {
+    const c = A.ctx, n = noiseSrc(), hp = c.createBiquadFilter(), g = c.createGain();
+    n.loop = true;
+    hp.type = 'highpass'; hp.frequency.value = 4500;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.3);
+    n.connect(hp); hp.connect(g); g.connect(A.music);
+    n.start(t); n.stop(t + 1.35);
+  }
+  function bass(t, f, dur, vol) {
+    const c = A.ctx, o1 = c.createOscillator(), o2 = c.createOscillator(), g2 = c.createGain(), lp = c.createBiquadFilter(), g = c.createGain();
+    o1.type = 'sine'; o1.frequency.value = f;
+    o2.type = 'triangle'; o2.frequency.value = f * 2; g2.gain.value = 0.35;
+    lp.type = 'lowpass'; lp.frequency.value = 1000;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.008);
+    g.gain.setValueAtTime(vol, t + dur * 0.6);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o1.connect(lp); o2.connect(g2); g2.connect(lp); lp.connect(g); g.connect(A.music);
+    o1.start(t); o2.start(t); o1.stop(t + dur + 0.02); o2.stop(t + dur + 0.02);
+  }
+  // 마림바: 기본음 + 네 배쯤 높은 배음이 '통' 하고 빨리 사라져요
+  function marimba(t, f, vol, wet) {
+    const c = A.ctx, o1 = c.createOscillator(), g1 = c.createGain(), o2 = c.createOscillator(), g2 = c.createGain();
+    o1.type = 'sine'; o1.frequency.value = f;
+    o2.type = 'sine'; o2.frequency.value = f * 3.93;
+    env(g1, t, vol, 0.003, 0.5);
+    env(g2, t, vol * 0.3, 0.002, 0.08);
+    o1.connect(g1); o2.connect(g2); g1.connect(A.music); g2.connect(A.music);
+    if (wet) g1.connect(A.delay);
+    o1.start(t); o2.start(t); o1.stop(t + 0.55); o2.stop(t + 0.12);
+  }
+  // 휘파람 같은 멜로디
+  function whistle(t, f, dur, vol) {
+    const c = A.ctx, o = c.createOscillator(), g = c.createGain(), lfo = c.createOscillator(), lg = c.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    lfo.frequency.value = 5.5; lg.gain.value = f * 0.01;
+    lfo.connect(lg); lg.connect(o.frequency);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.04);
+    g.gain.setValueAtTime(vol, t + Math.max(0.05, dur - 0.06));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.08);
+    o.connect(g); g.connect(A.music); g.connect(A.delay);
+    o.start(t); lfo.start(t); o.stop(t + dur + 0.1); lfo.stop(t + dur + 0.1);
+  }
+  function stab(t, notes, vol) {
+    const c = A.ctx, lp = c.createBiquadFilter(), g = c.createGain();
+    lp.type = 'lowpass'; lp.frequency.value = 2200;
+    env(g, t, vol, 0.004, 0.16);
+    notes.forEach(n => {
+      const o = c.createOscillator();
+      o.type = 'triangle'; o.frequency.value = mtof(n);
+      o.connect(lp); o.start(t); o.stop(t + 0.2);
+    });
+    lp.connect(g); g.connect(A.music);
+  }
+  function pad(t, notes, vol) {
+    const c = A.ctx, lp = c.createBiquadFilter(), g = c.createGain(), osc = [];
+    lp.type = 'lowpass'; lp.frequency.value = 1300;
+    notes.forEach(n => [-7, 7].forEach(cents => {
+      const o = c.createOscillator();
+      o.type = 'triangle'; o.frequency.value = mtof(n); o.detune.value = cents;
+      o.connect(lp); osc.push(o);
+    }));
+    g.gain.setValueAtTime(0.0001, t);
+    for (let b = 0; b < 4; b++) {
+      const bt = t + b * BEAT;
+      g.gain.setValueAtTime(vol * 0.35, bt);
+      g.gain.linearRampToValueAtTime(vol, bt + BEAT * 0.6);
+    }
+    g.gain.setValueAtTime(vol, t + BAR - 0.03);
+    g.gain.linearRampToValueAtTime(0.0001, t + BAR);
+    lp.connect(g); g.connect(A.music);
+    osc.forEach(o => { o.start(t); o.stop(t + BAR + 0.01); });
+  }
+
+  // --- 곡: 108BPM 여행 음악. Em - C - G - D. 앞 4마디 인트로, 그다음 16마디(마림바 8 · 휘파람 멜로디 8)를 반복해요 ---
+  const PROG = [
+    { root: 40, chord: [64, 67, 71], arp: [64, 67, 71, 76] }, // Em
+    { root: 36, chord: [64, 67, 72], arp: [60, 64, 67, 72] }, // C
+    { root: 43, chord: [62, 67, 71], arp: [59, 62, 67, 71] }, // G
+    { root: 38, chord: [62, 66, 69], arp: [62, 66, 69, 74] }, // D
+  ];
+  const ARP_POS = [0, 3, 6, 8, 10, 12, 14];
+  const ARP_IDX = [0, 1, 2, 3, 2, 1, 2];
+  // 베이스: [16분음표 자리, 근음에서 몇 반음, 길이]
+  const BASS = [[0, 0, 3], [3, 0, 3], [6, 0, 2], [8, 0, 2], [11, 7, 2], [14, 12, 2]];
+  // 멜로디 (새로 지은 가락): [자리, 음높이(MIDI), 길이]
+  const M1 = [[0, 71, 2], [2, 76, 2], [4, 79, 3], [8, 78, 2], [10, 76, 2], [12, 74, 2], [14, 76, 2]];
+  const M2 = [[0, 76, 2], [3, 79, 1], [4, 79, 2], [6, 81, 2], [8, 79, 2], [10, 76, 2], [12, 74, 4]];
+  const M3 = [[0, 74, 2], [2, 71, 2], [4, 74, 2], [6, 79, 2], [8, 78, 2], [10, 79, 2], [12, 81, 2], [14, 83, 2]];
+  const M4 = [[0, 81, 3], [3, 78, 1], [4, 74, 4], [8, 76, 2], [10, 78, 2], [12, 81, 4]];
+  const M7 = [[0, 74, 2], [2, 79, 2], [4, 83, 2], [6, 81, 2], [8, 79, 2], [10, 78, 2], [12, 79, 2], [14, 81, 2]];
+  const M8 = [[0, 78, 3], [3, 76, 1], [4, 74, 4], [8, 69, 2], [10, 71, 2], [12, 74, 4]];
+  const MEL = [M1, M2, M3, M4, M1, M2, M7, M8];
+
+  function playStep(step, t) {
+    const bar = Math.floor(step / 16), s = step % 16;
+    const intro = bar < 4;
+    const lb = intro ? -1 : (bar - 4) % 16;
+    const chorus = lb >= 8;
+    const ch = PROG[bar % 4];
+    if (s % 4 === 0) {
+      if (!intro) kick(t, 0.75);
+      beatVisual(t);
+    }
+    if (!intro && (s === 4 || s === 12)) clap(t, 0.18);
+    shaker(t, s % 4 === 2 ? 0.07 : 0.03);
+    if (!intro) for (const [pos, semi, len] of BASS) if (pos === s) bass(t, mtof(ch.root + semi), len * S16 * 0.92, 0.28);
+    if (!intro && s % 4 === 2) stab(t, ch.chord, 0.05);
+    if (s === 0) pad(t, ch.chord.map(n => n - 12), intro ? 0.08 : 0.035);
+    const ai = ARP_POS.indexOf(s);
+    if (ai >= 0) marimba(t, mtof(ch.arp[ARP_IDX[ai]]), intro ? 0.16 : chorus ? 0.05 : 0.1, !chorus);
+    if (chorus) {
+      for (const [pos, m, len] of MEL[lb - 8]) {
+        if (pos === s) { marimba(t, mtof(m), 0.14, true); whistle(t, mtof(m), len * S16, 0.045); }
+      }
+    }
+    if ((bar === 3 || lb === 7) && s >= 12) snare(t, 0.08 + 0.035 * (s - 12));
+    if (lb === 8 && s === 0) crash(t, 0.1);
+  }
+
+  const M = { playing: false, started: false, step: 0, next: 0, timer: null, pulse: false };
+  function tick() {
+    const ctx = A.ctx;
+    if (!ctx || !M.playing || ctx.state !== 'running') return;
+    if (M.next < ctx.currentTime - 0.25) M.next = ctx.currentTime + 0.05; // 멈췄다 돌아오면 박자를 다시 맞춰요
+    while (M.next < ctx.currentTime + 0.12) {
+      playStep(M.step, M.next);
+      M.next += S16;
+      M.step++;
+    }
+  }
+  function musicStart() {
+    const ctx = audio();
+    if (!ctx || M.playing) return;
+    M.playing = true;
+    M.step = M.started ? 64 : 0; // 두 번째부터는 인트로를 건너뛰어요
+    M.started = true;
+    M.next = ctx.currentTime + 0.08;
+    const g = A.music.gain;
+    g.cancelScheduledValues(ctx.currentTime);
+    g.setValueAtTime(g.value, ctx.currentTime);
+    g.linearRampToValueAtTime(MUSIC_VOL, ctx.currentTime + 0.3);
+    M.timer = setInterval(tick, 25);
+    tick();
+    document.body.classList.add('music-on');
+  }
+  function musicStop() {
+    if (!M.playing) return;
+    M.playing = false;
+    clearInterval(M.timer);
+    M.timer = null;
+    const ctx = A.ctx;
+    if (ctx) {
+      const g = A.music.gain;
+      g.cancelScheduledValues(ctx.currentTime);
+      g.setValueAtTime(g.value, ctx.currentTime);
+      g.linearRampToValueAtTime(0, ctx.currentTime + 0.25);
+    }
+    document.body.classList.remove('music-on');
+  }
+  function beatVisual(t) {
+    const wait = Math.max(0, (t - A.ctx.currentTime) * 1000);
+    setTimeout(() => {
+      if (!M.playing) return;
+      M.pulse = !M.pulse;
+      document.body.dataset.pulse = M.pulse ? 'a' : 'b';
+    }, wait);
+  }
+  // 말할 때는 음악을 줄여요
+  function duck(on) {
+    if (!A.ctx) return;
+    const t = A.ctx.currentTime, g = A.duck.gain;
+    g.cancelScheduledValues(t);
+    g.setTargetAtTime(on ? 0.22 : 1, t, on ? 0.04 : 0.3);
+  }
+
+  // --- 효과음 ---
+  function tone(freq, t0, dur, type, vol) {
+    const c = A.ctx, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.value = freq;
+    env(g, t0, vol, 0.012, dur);
+    o.connect(g); g.connect(A.sfx);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  function bell(f, t0, vol) {
+    tone(f, t0, 1.1, 'sine', vol);
+    tone(f * 2, t0, 0.5, 'sine', vol * 0.35);
+    tone(f * 3, t0, 0.25, 'sine', vol * 0.12);
+  }
+  let lastClack = 0;
+  function sfx(kind) {
+    if (!state.settings.voice) return;
+    const ctx = audio();
+    if (!ctx) return;
+    const t = ctx.currentTime + 0.01;
+    const run = (notes, gap, dur, type, vol) => notes.forEach((f, i) => tone(f, t + i * gap, dur, type, vol));
+    if (kind === 'chime') { bell(659.25, t, 0.15); bell(523.25, t + 0.34, 0.15); } // 공항 안내 방송 '띵-동'
+    if (kind === 'clack') {
+      if (t - lastClack < 0.03) return;
+      lastClack = t;
+      const n = noiseSrc(), hp = ctx.createBiquadFilter(), g = ctx.createGain();
+      hp.type = 'highpass'; hp.frequency.value = 2500;
+      env(g, t, 0.09, 0.001, 0.012);
+      n.connect(hp); hp.connect(g); g.connect(A.sfx);
+      n.start(t, Math.random() * 0.5); n.stop(t + 0.02);
+    }
+    if (kind === 'stamp') {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(140, t);
+      o.frequency.exponentialRampToValueAtTime(55, t + 0.12);
+      env(g, t, 0.3, 0.003, 0.15);
+      o.connect(g); g.connect(A.sfx);
+      o.start(t); o.stop(t + 0.2);
+      const n = noiseSrc(), lp = ctx.createBiquadFilter(), ng = ctx.createGain();
+      lp.type = 'lowpass'; lp.frequency.value = 900;
+      env(ng, t, 0.16, 0.002, 0.06);
+      n.connect(lp); lp.connect(ng); ng.connect(A.sfx);
+      n.start(t, Math.random() * 0.5); n.stop(t + 0.08);
+    }
+    if (kind === 'right') run([523.25, 659.25, 783.99, 1046.5], 0.1, 0.42, 'triangle', 0.15);
+    if (kind === 'wrong') run([311.1, 233.1], 0.15, 0.3, 'sine', 0.13);
+    if (kind === 'end') run([523.25, 659.25, 783.99, 1046.5, 1318.5, 1568], 0.12, 0.5, 'triangle', 0.14);
+    if (kind === 'tap') tone(880, t, 0.08, 'sine', 0.06);
+    if (kind === 'hint') run([1318.5, 1760], 0.08, 0.35, 'sine', 0.08);
+  }
+
+  /* ---------- 읽어 주기 ---------- */
+  const tts = { ok: 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined', voice: null, seq: 0, safety: null };
+  function pickVoice() {
+    if (!tts.ok) return;
+    const voices = speechSynthesis.getVoices();
+    tts.voice = voices.find(v => /^ko/i.test(v.lang)) || null;
+    checkTTS();
+  }
+  // 여러 문장을 이어서 읽고, 문장이 시작될 때마다 할 일을 불러요 (보기 읽을 때 탑승권 빛내기)
+  function sayParts(parts, done) {
+    const finish = () => { if (done) done(); };
+    highlight(-1);
+    if (!state.settings.voice || !tts.ok || !parts.length) { finish(); return; }
+    try {
+      speechSynthesis.cancel();
+      const token = ++tts.seq;
+      duck(true);
+      clearTimeout(tts.safety);
+      const len = parts.reduce((s, p) => s + p.text.length, 0);
+      tts.safety = setTimeout(() => { if (tts.seq === token) { duck(false); finish(); } }, Math.min(16000, 1200 + len * 170 + parts.length * 450));
+      parts.forEach((p, i) => {
+        const u = new SpeechSynthesisUtterance(p.text);
+        u.lang = 'ko-KR';
+        if (tts.voice) u.voice = tts.voice;
+        u.rate = 0.95;
+        u.pitch = 1.1;
+        if (p.onstart) u.onstart = () => { if (tts.seq === token) p.onstart(); };
+        if (i === parts.length - 1) {
+          u.onend = u.onerror = () => {
+            if (tts.seq !== token) return;
+            clearTimeout(tts.safety);
+            duck(false);
+            finish();
+          };
+        }
+        speechSynthesis.speak(u);
+      });
+    } catch (e) { duck(false); finish(); }
+  }
+  const say = text => sayParts([{ text }]);
+  function hush() {
+    tts.seq++;
+    clearTimeout(tts.safety);
+    if (tts.ok) { try { speechSynthesis.cancel(); } catch (e) { /* 무시 */ } }
+    duck(false);
+    highlight(-1);
+  }
+  function checkTTS() {
+    const note = $('ttsNote');
+    if (!tts.ok) {
+      note.textContent = '이 화면에서는 소리로 읽어 주기가 안 돼요. 어른이 문제와 보기를 읽어 주세요. 크롬이나 사파리에서 열면 읽어 줄 수 있어요.';
+      note.hidden = false;
+      return;
+    }
+    const voices = speechSynthesis.getVoices();
+    if (voices.length && !tts.voice) {
+      note.textContent = '이 기기에는 한국어 목소리가 없어서 소리가 어색할 수 있어요. 어른이 읽어 주세요.';
+      note.hidden = false;
+    } else {
+      note.hidden = true;
+    }
+  }
+
+  // 윈도우 PC처럼 국기 그림이 글자로 보이는 기기에서는 국기 글꼴을 불러와요
+  function ensureFlagFont() {
+    let ok = false;
+    try {
+      const cv = document.createElement('canvas');
+      cv.width = 40; cv.height = 40;
+      const x = cv.getContext('2d', { willReadFrequently: true });
+      x.textBaseline = 'top';
+      x.font = '32px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+      x.fillText(flagOf('KR'), 0, 2);
+      const d = x.getImageData(0, 0, 40, 40).data;
+      let colored = 0;
+      for (let i = 0; i < d.length; i += 4) {
+        if (d[i + 3] > 120 && Math.max(d[i], d[i + 1], d[i + 2]) - Math.min(d[i], d[i + 1], d[i + 2]) > 70) colored++;
+      }
+      ok = colored > 15;
+    } catch (e) { ok = false; }
+    if (ok) return;
+    try {
+      const l = document.createElement('link');
+      l.rel = 'stylesheet';
+      l.href = 'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap';
+      document.head.appendChild(l);
+    } catch (e) { /* 국기 대신 글자로 보여요 */ }
+  }
+
+  let wake = null;
+  async function keepAwake() {
+    try {
+      if ('wakeLock' in navigator && !wake) {
+        wake = await navigator.wakeLock.request('screen');
+        wake.addEventListener('release', () => { wake = null; });
+      }
+    } catch (e) { wake = null; }
+  }
+
+  /* ---------- 안내판 글자 넘기기 ---------- */
+  const tilesHTML = (chars, hidden) => chars.map(ch => `<span class="tile${hidden ? ' q' : ''}"><span class="ch">${hidden ? '?' : esc(ch)}</span></span>`).join('');
+  // o.only: 넘길 칸 번호, o.cls: 칸이 멈춘 뒤 붙일 모양('q' 물음표, 'hint' 힌트 글자)
+  function spin(container, finalChars, steps, opts) {
+    const o = opts || {};
+    const tok = String(Math.random());
+    const tiles = Array.from(container.querySelectorAll('.tile'));
+    const pick = o.only || tiles.map((_, i) => i);
+    const land = i => {
+      const tile = tiles[i];
+      tile.querySelector('.ch').textContent = finalChars[i];
+      tile.classList.remove('q', 'hint');
+      const c = o.cls ? o.cls(i) : '';
+      if (c) tile.classList.add(c);
+    };
+    if (reduced() || !pick.length) { pick.forEach(land); if (o.done) o.done(); return; }
+    let left = pick.length;
+    pick.forEach((i, order) => {
+      const tile = tiles[i], ch = tile.querySelector('.ch');
+      tile.dataset.tok = tok;
+      const total = steps + order;
+      let k = 0;
+      const step = () => {
+        if (tile.dataset.tok !== tok || !document.contains(tile)) return;
+        k++;
+        replay(tile, 'flip');
+        if (!o.quiet) sfx('clack');
+        if (k >= total) {
+          land(i);
+          if (--left === 0 && o.done) o.done();
+          return;
+        }
+        ch.textContent = FLIP_CHARS[rand(FLIP_CHARS.length)];
+        setTimeout(step, 60);
+      };
+      setTimeout(step, order * 45);
+    });
+  }
+
+  /* ---------- 화면 전환 ---------- */
+  function showScreen(name) {
+    state.screen = name;
+    for (const id of ['setup', 'play', 'end']) $(id).hidden = id !== name;
+    if (name !== 'play') {
+      setSheet(false);
+      $('turnCard').hidden = true;
+    }
+    window.scrollTo(0, 0);
+  }
+  function setSheet(open) { $('sheet').hidden = !open; }
+
+  /* ---------- 시작 화면 ---------- */
+  const TITLE = ['세계', '수도', '여행'];
+  function renderTitle() {
+    $('titleBoard').innerHTML = TITLE.map(w => `<span class="word" aria-hidden="true">${tilesHTML(Array.from(w), false)}</span>`).join('');
+  }
+  function titleIntro() {
+    setTimeout(() => {
+      if (state.screen !== 'setup') return;
+      $('titleBoard').querySelectorAll('.word').forEach((word, wi) => {
+        setTimeout(() => spin(word, Array.from(TITLE[wi]), 6, { quiet: true }), wi * 160);
+      });
+    }, 450);
+  }
+  function renderSetup() {
+    const s = state.settings;
+    const wrap = $('players');
+    wrap.innerHTML = '';
+    for (let i = 0; i < s.count; i++) {
+      const p = s.players[i];
+      const row = document.createElement('div');
+      row.className = 'player-row';
+      row.dataset.i = i;
+      row.innerHTML = `
+        <div class="who">
+          <span class="avatar" aria-hidden="true">${AVATARS[i]}</span>
+          <input class="name" id="p${i}-name" maxlength="8" autocomplete="off" aria-label="${i + 1}번 친구 이름">
+        </div>
+        <div class="opts">
+          <div class="opt">
+            <span class="opt-label">보기</span>
+            <div class="seg" role="radiogroup" aria-label="보기 수">
+              ${[2, 3, 4].map(n => `<button type="button" role="radio" data-choices="${n}" aria-checked="${p.choices === n}">${n}개</button>`).join('')}
+            </div>
+          </div>
+        </div>`;
+      row.querySelector('.name').value = p.name;
+      wrap.appendChild(row);
+    }
+    $('togglePlayer').textContent = s.count === 2 ? '한 명만 할래요' : '+ 한 명 더';
+    $('levelHelp').textContent = `세계 ${TOTAL}개 나라가 모두 나와요. ‘모든 나라’를 고르면 한 판에 ${TOTAL}문제를 다 풀고, 70문제씩 하면 세 판 만에 모든 나라를 돌아요. 한 번 나온 나라는 모든 나라가 다 나온 뒤에 다시 나와요. 힌트 1은 글자 수, 힌트 2는 첫 글자, 힌트 3은 초성이에요. 보기가 3개 이상이면 시드니처럼 헷갈리는 큰 도시도 섞여요.`;
+    const rb = $('resumeBtn');
+    rb.hidden = !savedGame;
+    if (savedGame) rb.innerHTML = `이어서 하기<small>${savedGame.done + 1} / ${savedGame.total}</small>`;
+    $('startBtn').textContent = savedGame ? '새로 출발!' : '출발!';
+    renderTrip($('tripSetup'));
+    syncSeg($('perPlayer'), 'n', s.total);
+    syncToggles();
+  }
+  function syncSeg(group, key, value) {
+    group.querySelectorAll('button[role="radio"]').forEach(b => b.setAttribute('aria-checked', String(b.dataset[key] === String(value))));
+  }
+  function syncToggles() {
+    const s = state.settings;
+    $('voiceOn').checked = s.voice;
+    $('musicOn').checked = s.music;
+    const vb = $('voiceBtn');
+    vb.querySelector('.ic').textContent = s.voice ? '🔊' : '🔇';
+    vb.setAttribute('aria-pressed', String(s.voice));
+    vb.setAttribute('aria-label', s.voice ? '소리 끄기' : '소리 켜기');
+    const mb = $('musicBtn');
+    mb.classList.toggle('off', !s.music);
+    mb.setAttribute('aria-pressed', String(s.music));
+    mb.setAttribute('aria-label', s.music ? '음악 끄기' : '음악 켜기');
+    $('previewBtn').textContent = M.playing ? '■ 음악 멈추기' : '▶ 음악 들어 보기';
+  }
+
+  /* ---------- 게임 ---------- */
+  const alive = (g, round) => state.game === g && g.round === round && state.screen === 'play';
+  function resumeGame() {
+    const g = savedGame;
+    if (!validGame(g)) return;
+    audio();
+    hush();
+    state.game = g;
+    g.awaitingTurn = false;
+    if (typeof g.current.hints !== 'number') g.current.hints = 0;
+    if (!Array.isArray(g.current.wrong)) g.current.wrong = [];
+    renderRound('static');
+    showScreen('play');
+    keepAwake();
+    if (state.settings.music) musicStart(); else musicStop();
+    syncToggles();
+    if (g.current.solved) showSheet();
+    else if (g.players.length > 1) showTurn();
+    else announce(false);
+  }
+  function startGame() {
+    audio();
+    hush();
+    const s = state.settings;
+    const players = s.players.slice(0, s.count).map((p, i) => ({
+      name: p.name.trim() || NAMES[i],
+      choices: p.choices,
+      stars: 0,
+      stamps: [],
+    }));
+    clearGame();
+    if (s.total >= TOTAL) { progress.asked.length = 0; saveProgress(); } // 모든 나라: 194곳을 한 번씩 빠짐없이
+    state.game = { players, total: s.total, done: 0, turn: 0, round: 0, current: null, awaitingTurn: false };
+    newRound(players.length > 1 ? 'hidden' : 'spin');
+    saveGame();
+    showScreen('play');
+    keepAwake();
+    if (s.music) musicStart(); else musicStop();
+    syncToggles();
+    if (players.length > 1) showTurn();
+    else announce(true);
+  }
+  function newRound(mode) {
+    const g = state.game;
+    const p = g.players[g.turn];
+    const e = drawCountry(progress.asked);
+    saveProgress();
+    g.current = { code: e.code, options: makeOptions(e, p.choices), wrong: [], hints: 0, solved: false, earned: 0 };
+    g.round++;
+    renderRound(mode);
+  }
+  function renderScores() {
+    const g = state.game;
+    $('scores').innerHTML = g.players.map((p, i) => `
+      <div class="score${i === g.turn ? ' active' : ''}">
+        <span class="av" aria-hidden="true">${AVATARS[i]}</span>
+        <span class="nm">${esc(p.name)}</span>
+        <span class="st" aria-label="별 ${p.stars}개">★ ${p.stars}</span>
+      </div>`).join('');
+    $('progress').textContent = `${Math.min(g.done + 1, g.total)} / ${g.total}`;
+  }
+  function renderRound(mode) {
+    const q = state.game.current, e = BY_CODE[q.code];
+    renderScores();
+    renderBoard(mode);
+    $('promptText').textContent = questionText(e);
+    $('tip').textContent = q.solved ? (FACT[e.code] || '') : q.hints ? `힌트 ${q.hints} · ${hintText(e, q.hints).show}` : '모르면 힌트를 눌러 봐요';
+    renderHints();
+    renderTickets();
+  }
+  function renderBoard(mode) {
+    const q = state.game.current, e = BY_CODE[q.code];
+    const cChars = tileChars(e.name), aChars = tileChars(e.cap);
+    const board = $('board');
+    board.style.setProperty('--n', Math.max(cChars.length, aChars.length, 4));
+    board.setAttribute('aria-label', `도착 나라 ${e.name}, ${e.cont}`);
+    $('cont').textContent = e.cont;
+    $('flag').textContent = flagOf(e.code);
+    $('countryTiles').innerHTML = tilesHTML(cChars, mode !== 'static');
+    renderCapital(q, e);
+    setStatus(q.solved);
+    if (mode === 'spin') spin($('countryTiles'), cChars, 3);
+  }
+  // 수도 칸: 힌트를 열기 전에는 가림판, 연 만큼 글자가 보여요
+  function renderCapital(q, e) {
+    const box = $('capitalTiles');
+    if (q.solved) { box.innerHTML = tilesHTML(tileChars(e.cap), false); return; }
+    if (!q.hints) { box.innerHTML = '<span class="cover"><b>?</b>몇 글자일까요?</span>'; return; }
+    box.innerHTML = hintTiles(e, q.hints).map(([ch, cls]) => `<span class="tile ${cls}"><span class="ch">${esc(ch)}</span></span>`).join('');
+  }
+  const HINT_SAY = k => `힌트 ${['', '하나', '둘', '셋'][k]}!`;
+  function renderHints() {
+    const q = state.game.current;
+    document.querySelectorAll('.hint-btn').forEach((b, idx) => {
+      const k = idx + 1;
+      b.classList.toggle('opened', k <= q.hints);
+      b.classList.toggle('ready', !q.solved && k === q.hints + 1);
+      b.classList.toggle('locked', !q.solved && k > q.hints + 1);
+      b.disabled = q.solved && k > q.hints;
+    });
+  }
+  // 힌트를 열어요. 틀린 뒤에 저절로 열 때는 틀린 까닭을 먼저 말해요
+  function openHint(speechPrefix, showPrefix) {
+    const g = state.game, q = g && g.current;
+    if (!q || q.solved || g.awaitingTurn || q.hints >= 3) return;
+    const e = BY_CODE[q.code];
+    q.hints++;
+    const k = q.hints, h = hintText(e, k);
+    const box = $('capitalTiles');
+    const chars = tileChars(e.cap);
+    if (k === 1) {
+      box.innerHTML = tilesHTML(chars, true);
+      spin(box, chars.map(() => '?'), 2, { cls: () => 'q' });
+    } else {
+      const target = hintTiles(e, k);
+      const only = k === 2 ? [0] : chars.map((_, i) => i).filter(i => i > 0);
+      spin(box, target.map(t => t[0]), 4, { only, cls: i => target[i][1] });
+    }
+    renderHints();
+    saveGame();
+    const btn = document.querySelectorAll('.hint-btn')[k - 1];
+    if (btn) replay(btn, 'pop');
+    $('tip').textContent = `${showPrefix ? showPrefix + ' ' : ''}힌트 ${k} · ${h.show}`;
+    replay($('tip'), 'nudge');
+    sfx('hint');
+    const parts = [{ text: `${HINT_SAY(k)} ${h.say}` }];
+    if (speechPrefix) parts.unshift({ text: speechPrefix });
+    sayParts(parts);
+  }
+  function onHintTap(b) {
+    const g = state.game, q = g && g.current;
+    if (!q || q.solved || g.awaitingTurn) return;
+    const k = +b.dataset.k;
+    hush();
+    if (k <= q.hints) {
+      const h = hintText(BY_CODE[q.code], k);
+      $('tip').textContent = `힌트 ${k} · ${h.show}`;
+      say(`${HINT_SAY(k)} ${h.say}`);
+      return;
+    }
+    openHint();
+  }
+  function revealCountry() {
+    const e = BY_CODE[state.game.current.code];
+    spin($('countryTiles'), tileChars(e.name), 3);
+  }
+  function setStatus(arrived) {
+    const s = $('status');
+    s.textContent = arrived ? '도착' : '탑승 중';
+    s.classList.toggle('arrived', arrived);
+  }
+  function renderTickets() {
+    const q = state.game.current;
+    const box = $('tickets');
+    box.dataset.n = q.options.length;
+    const offset = rand(BANDS.length);
+    box.innerHTML = q.options.map((o, i) => {
+      const band = BANDS[(i + offset) % BANDS.length];
+      const wrong = q.wrong.includes(i);
+      const right = q.solved && o.correct;
+      const long = tileChars(o.text).length > 6;
+      return `<button type="button" class="ticket${wrong ? ' wrong' : ''}${right ? ' right' : ''}" data-i="${i}" style="--band:var(--${band})"${wrong ? ' disabled' : ''}>
+        <span class="stub" aria-hidden="true"><span class="no">${i + 1}</span></span>
+        <span class="city"><small aria-hidden="true">도착 도시</small><b class="${long ? 'long' : ''}">${esc(o.text)}</b></span>
+        <span class="stamp" aria-hidden="true">${right ? '도착!' : wrong ? '다시!' : ''}</span>
+      </button>`;
+    }).join('');
+  }
+  function highlight(i) {
+    document.querySelectorAll('.ticket').forEach((t, k) => t.classList.toggle('reading', k === i));
+  }
+
+  // 안내 방송 '띵-동' 다음에 문제와 보기를 읽어요
+  function announce(first) {
+    const g = state.game;
+    if (!g) return;
+    const round = g.round;
+    sfx('chime');
+    setTimeout(() => {
+      if (alive(g, round) && !g.awaitingTurn && !g.current.solved) speakQuestion(first);
+    }, state.settings.voice ? 800 : 0);
+  }
+  function speakQuestion(first) {
+    const g = state.game, q = g && g.current;
+    if (!q || q.solved) return;
+    const e = BY_CODE[q.code];
+    const intro = first ? `${e.name}${euro(e.name)} 떠나요! ` : '';
+    const parts = [{ text: intro + questionText(e) }];
+    q.options.forEach((o, i) => {
+      if (!q.wrong.includes(i)) parts.push({ text: o.say, onstart: () => highlight(i) });
+    });
+    if (first && g.done === 0) parts.push({ text: '모르면 힌트를 눌러 봐요.', onstart: () => highlight(-1) });
+    sayParts(parts, () => highlight(-1));
+  }
+
+  function onPick(btn) {
+    const g = state.game, q = g && g.current;
+    if (!q || q.solved || g.awaitingTurn) return;
+    const i = +btn.dataset.i;
+    if (q.wrong.includes(i)) return;
+    hush();
+    const o = q.options[i], e = BY_CODE[q.code];
+    if (o.correct) {
+      q.solved = true;
+      q.earned = Math.max(1, 3 - Math.max(q.hints, q.wrong.length)); // 힌트 없이 별 3개, 힌트 하나면 2개, 그 뒤로는 1개
+      const p = g.players[g.turn];
+      p.stars += q.earned;
+      if (!p.stamps.includes(e.code)) p.stamps.push(e.code);
+      if (!progress.visited.includes(e.code)) { progress.visited.push(e.code); saveProgress(); }
+      saveGame();
+      btn.classList.add('right');
+      btn.querySelector('.stamp').textContent = '도착!';
+      sfx('stamp');
+      renderScores();
+      $('tip').textContent = FACT[e.code] || `${e.name}의 수도는 ${e.cap}${copula(e.say)}.`;
+      const round = g.round;
+      if (!q.hints) $('capitalTiles').innerHTML = tilesHTML(tileChars(e.cap), true);
+      renderHints();
+      spin($('capitalTiles'), tileChars(e.cap), 4, {
+        done: () => {
+          if (!alive(g, round)) return;
+          setStatus(true);
+          sfx('right');
+          say(rightSpeech(e));
+          fly();
+          confetti();
+          setTimeout(() => { if (alive(g, round)) showSheet(); }, 1500);
+        },
+      });
+    } else {
+      q.wrong.push(i);
+      saveGame();
+      btn.classList.add('wrong');
+      btn.disabled = true;
+      btn.querySelector('.stamp').textContent = '다시!';
+      replay($('board'), 'shake');
+      sfx('wrong');
+      if (q.hints < 3) {
+        openHint(`${wrongLine(o, e, true)} 힌트를 줄게요.`, wrongLine(o, e, false));
+      } else {
+        $('tip').textContent = `${wrongLine(o, e, false)} 다시 골라 봐요!`;
+        replay($('tip'), 'nudge');
+        say(`${wrongLine(o, e, true)} 다시 골라 볼까요?`);
+      }
+    }
+  }
+
+  function stampHTML(code, i, big) {
+    const e = BY_CODE[code];
+    const rot = ((i * 37 + code.charCodeAt(0)) % 25) - 12;
+    const long = tileChars(e.cap).length > 5;
+    return `<span class="pstamp${big ? ' big' : ''}" style="--ink-c:var(--${CONT_INK[e.cont]});--rot:${rot}deg" role="img" aria-label="${esc(e.name)} ${esc(e.cap)} 도장">
+      <span class="pf" aria-hidden="true">${flagOf(code)}</span>
+      <span class="pc${long ? ' long' : ''}" aria-hidden="true">${esc(e.cap)}</span>
+      <span class="pd" aria-hidden="true">도착</span>
+    </span>`;
+  }
+  function showSheet() {
+    const g = state.game, q = g.current;
+    if (!q || !q.solved) return;
+    const e = BY_CODE[q.code];
+    $('sheetStamp').innerHTML = stampHTML(e.code, g.done, true);
+    $('sheetStars').innerHTML = [0, 1, 2].map(i => `<span class="${i < q.earned ? 'on' : ''}">★</span>`).join('');
+    $('sheetStars').setAttribute('aria-label', `별 ${q.earned}개`);
+    $('sheetLine').innerHTML = `${esc(e.name)}의 수도는 <b>${esc(e.cap)}</b>`;
+    $('sheetFact').textContent = FACT[e.code] || STAR_MSG[q.earned];
+    $('nextBtn').textContent = g.done + 1 >= g.total ? '여권 보러 가기' : '다음 여행';
+    $('stopBtn').hidden = g.done + 1 >= g.total;
+    setSheet(true);
+  }
+  function next() {
+    const g = state.game;
+    if (!g) return;
+    setSheet(false);
+    hush();
+    g.done++;
+    if (g.done >= g.total) { finish(); return; }
+    g.turn = g.done % g.players.length;
+    newRound(g.players.length > 1 ? 'hidden' : 'spin');
+    saveGame();
+    window.scrollTo(0, 0);
+    if (g.players.length > 1) showTurn();
+    else announce(true);
+  }
+  function showTurn() {
+    const g = state.game, p = g.players[g.turn];
+    g.awaitingTurn = true;
+    $('turnAvatar').textContent = AVATARS[g.turn];
+    $('turnName').textContent = `${p.name} 차례예요!`;
+    $('turnMode').textContent = `보기 ${p.choices}개 · 힌트 3개`;
+    $('turnCard').hidden = false;
+    say(`${p.name} 차례예요!`);
+  }
+  function beginTurn() {
+    const g = state.game;
+    if (!g) return;
+    g.awaitingTurn = false;
+    $('turnCard').hidden = true;
+    revealCountry();
+    announce(true);
+  }
+  function finish() {
+    const g = state.game;
+    clearGame();
+    showScreen('end');
+    renderEnd();
+    sfx('end');
+    const lines = g.players.map(p => `${p.name}${eunneun(p.name)} 도장 ${natDet(p.stamps.length)} 개`).join(', ');
+    say(`여행 끝! 모두 정말 잘했어요. ${lines}를 모았어요!`);
+  }
+  function renderEnd() {
+    const g = state.game;
+    $('passports').innerHTML = g.players.map((p, i) => `
+      <div class="passport">
+        <div class="pp-cover">
+          <span class="av" aria-hidden="true">${AVATARS[i]}</span>
+          <span class="nm">${esc(p.name)}<small>여권 · PASSPORT</small></span>
+          <span class="st">★ ${p.stars}</span>
+        </div>
+        <div class="pp-page">
+          <div class="pp-stamps${p.stamps.length > 24 ? ' many' : ''}">${p.stamps.map((c, k) => stampHTML(c, k, false)).join('')}</div>
+          <p class="pp-count">도장 ${p.stamps.length}개</p>
+        </div>
+      </div>`).join('');
+    renderTrip($('tripEnd'));
+  }
+  const PLANE_PATH = 'M21 13.2H14L9.5 20H7.6L10 13.2H5.2L3.6 15.5H2.2L3.2 12L2.2 8.5H3.6L5.2 10.8H10L7.6 4H9.5L14 10.8H21A1.2 1.2 0 0 1 21 13.2Z';
+  function renderTrip(el) {
+    if (!el) return;
+    const n = progress.visited.length;
+    const pct = Math.round((n / TOTAL) * 1000) / 10;
+    const note = n >= TOTAL ? '세계 일주를 마쳤어요! 이제 처음부터 다시 돌아요.'
+      : n ? `맞힌 나라가 여기에 쌓여요. 아직 ${TOTAL - n}곳 남았어요.` : '맞힌 나라가 여기에 하나씩 쌓여요.';
+    el.innerHTML = `
+      <div class="trip-top"><span>세계 일주</span><b>${n} / ${TOTAL}곳</b></div>
+      <div class="trip-track" style="--p:${pct}%" aria-hidden="true"><span class="trip-fill"></span><svg class="trip-plane" viewBox="0 0 24 24"><path d="${PLANE_PATH}"/></svg></div>
+      <p class="trip-note">${note}</p>`;
+  }
+  function goHome() {
+    disarm();
+    musicStop();
+    hush();
+    if (state.screen === 'play' && validGame(state.game)) { saveGame(); savedGame = state.game; }
+    state.game = null;
+    showScreen('setup');
+    renderSetup();
+  }
+  let armTimer = null;
+  function onHome() {
+    const b = $('homeBtn');
+    if (state.screen === 'play' && !b.classList.contains('armed')) {
+      b.classList.add('armed');
+      b.querySelector('.lbl').textContent = '한 번 더 누르면 나가요';
+      clearTimeout(armTimer);
+      armTimer = setTimeout(disarm, 2600);
+      return;
+    }
+    goHome();
+  }
+  function disarm() {
+    clearTimeout(armTimer);
+    const b = $('homeBtn');
+    b.classList.remove('armed');
+    b.querySelector('.lbl').textContent = '처음으로';
+  }
+  function toggleMusic() {
+    state.settings.music = !state.settings.music;
+    saveSettings();
+    if (state.settings.music) musicStart(); else musicStop();
+    syncToggles();
+  }
+  function toggleVoice() {
+    state.settings.voice = !state.settings.voice;
+    saveSettings();
+    if (!state.settings.voice) hush();
+    syncToggles();
+  }
+  function fly() {
+    if (reduced()) return;
+    replay($('jet'), 'go');
+  }
+  function confetti() {
+    const box = $('confetti');
+    if (reduced()) return;
+    const colors = ['red', 'blue', 'paper', 'orange', 'green'];
+    let html = '';
+    for (let i = 0; i < 40; i++) {
+      html += `<i style="left:${(Math.random() * 100).toFixed(1)}%;--c:var(--${colors[i % colors.length]});--dur:${(1.3 + Math.random() * 1.2).toFixed(2)}s;--dx:${Math.round(Math.random() * 160 - 80)}px;--rot:${Math.round(Math.random() * 900 - 450)}deg;animation-delay:${(Math.random() * 0.25).toFixed(2)}s"></i>`;
+    }
+    box.innerHTML = html;
+    clearTimeout(confetti.t);
+    confetti.t = setTimeout(() => { box.innerHTML = ''; }, 3000);
+  }
+
+  /* ---------- 이벤트 ---------- */
+  function bindEvents() {
+    $('players').addEventListener('click', e => {
+      const b = e.target.closest('button[role="radio"]');
+      if (!b) return;
+      const p = state.settings.players[+b.closest('.player-row').dataset.i];
+      if (b.dataset.choices) { p.choices = +b.dataset.choices; syncSeg(b.parentElement, 'choices', p.choices); }
+      saveSettings();
+      sfx('tap');
+    });
+    $('players').addEventListener('input', e => {
+      const m = e.target.id && e.target.id.match(/^p(\d)-name$/);
+      if (m) { state.settings.players[+m[1]].name = e.target.value.slice(0, 8); saveSettings(); }
+    });
+    $('togglePlayer').addEventListener('click', () => {
+      state.settings.count = state.settings.count === 2 ? 1 : 2;
+      saveSettings();
+      renderSetup();
+    });
+    $('perPlayer').addEventListener('click', e => {
+      const b = e.target.closest('button[role="radio"]');
+      if (!b) return;
+      state.settings.total = +b.dataset.n;
+      syncSeg($('perPlayer'), 'n', state.settings.total);
+      saveSettings();
+    });
+    $('voiceOn').addEventListener('change', e => { state.settings.voice = e.target.checked; saveSettings(); if (!e.target.checked) hush(); syncToggles(); });
+    $('musicOn').addEventListener('change', e => { state.settings.music = e.target.checked; saveSettings(); if (!e.target.checked) musicStop(); syncToggles(); });
+    $('previewBtn').addEventListener('click', () => { if (M.playing) musicStop(); else musicStart(); syncToggles(); });
+    $('startBtn').addEventListener('click', startGame);
+    $('tickets').addEventListener('click', e => { const b = e.target.closest('.ticket'); if (b) onPick(b); });
+    $('prompt').addEventListener('click', () => speakQuestion(false));
+    $('hints').addEventListener('click', e => { const b = e.target.closest('.hint-btn'); if (b) onHintTap(b); });
+    $('musicBtn').addEventListener('click', toggleMusic);
+    $('voiceBtn').addEventListener('click', toggleVoice);
+    $('homeBtn').addEventListener('click', onHome);
+    $('nextBtn').addEventListener('click', next);
+    $('stopBtn').addEventListener('click', () => { if (!state.game) return; setSheet(false); hush(); finish(); });
+    $('resumeBtn').addEventListener('click', resumeGame);
+    $('turnGo').addEventListener('click', beginTurn);
+    $('againBtn').addEventListener('click', startGame);
+    $('setupBtn').addEventListener('click', goHome);
+    // 화면을 처음 누를 때 소리를 깨워요 (휴대폰은 누르기 전에는 소리가 안 나요)
+    document.addEventListener('pointerdown', e => {
+      if (!A.ctx && state.screen === 'setup') return;
+      audio();
+      if (state.settings.music && !M.playing && state.screen !== 'setup' && !e.target.closest('#musicBtn')) musicStart();
+    }, { passive: true });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        hush();
+        if (A.ctx) A.ctx.suspend().catch(() => {});
+      } else {
+        if (A.ctx && (M.playing || state.screen !== 'setup')) A.ctx.resume().catch(() => {});
+        if (state.screen === 'play') keepAwake();
+      }
+    });
+    if (tts.ok) {
+      pickVoice();
+      if (speechSynthesis.addEventListener) speechSynthesis.addEventListener('voiceschanged', pickVoice);
+      else speechSynthesis.onvoiceschanged = pickVoice;
+    } else {
+      checkTTS();
+    }
+  }
+
+  /* ---------- 시작 ---------- */
+  function boot(data) {
+    loadSettings();
+    loadProgress();
+    loadGame();
+    if (data && data.settings) state.settings = sanitize(data.settings);
+    ensureFlagFont();
+    renderTitle();
+    bindEvents();
+    renderSetup();
+    // 화면을 고친 새 버전이 열려도 하던 여행을 이어 가요
+    try {
+      const g = data && data.game;
+      if (g && Array.isArray(g.players) && g.current && BY_CODE[g.current.code] && (data.screen === 'play' || data.screen === 'end')) {
+        state.game = g;
+        if (data.screen === 'end') { renderEnd(); showScreen('end'); return; }
+        g.awaitingTurn = false;
+        if (typeof g.current.hints !== 'number') g.current.hints = 0;
+        renderRound('static');
+        showScreen('play');
+        if (g.current.solved) showSheet();
+        return;
+      }
+    } catch (e) { state.game = null; }
+    showScreen('setup');
+    titleIntro();
+  }
+  try {
+    if (window.claude && window.claude.hot && typeof window.claude.hot.snapshot === 'function') {
+      window.claude.hot.snapshot(() => ({ settings: state.settings, screen: state.screen, game: state.game }));
+    }
+  } catch (e) { /* 미리보기 밖에서는 없어요 */ }
+  const hot = window.claude && window.claude.hot;
+  if (hot && typeof hot.ready === 'function') hot.ready(boot);
+  else boot((hot && hot.data) || {});
+})();
+</script>
+</body>
+</html>
