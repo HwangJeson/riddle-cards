@@ -1,0 +1,1475 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>알파벳 찾기 파티</title>
+<meta name="description" content="상자 속에 숨은 알파벳을 힌트 낱말로 찾아요. A부터 Z까지!">
+<meta name="theme-color" content="#0c1136">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%232c2482'/%3E%3Ctext x='50' y='70' font-size='58' text-anchor='middle' font-family='Arial' font-weight='700' fill='%23ffd66e'%3EAa%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Gowun+Dodum&family=Jua&display=swap">
+<style>
+/* Layout: same night-sky stage as the riddle card game. Glowing box with "?" on top, hint words right under it, the 알파벳 보기 switch, then letter cards; wide screens move the cards to a right-hand column. */
+:root{
+  --night:#0c1136;
+  --night-2:#1d1656;
+  --panel:#171b4c;
+  --glass:rgba(255,255,255,.05);
+  --ink:#f4f1ff;
+  --muted:#aab1e6;
+  --line:#3b4089;
+  --aurora-a:#45f0c4;
+  --aurora-b:#8f6dff;
+  --aurora-c:#ff8bd7;
+  --gold:#ffd66e;
+  --box-top:#4b3db0;
+  --box-mid:#2c2482;
+  --box-deep:#17135a;
+  --card:#fffaf0;
+  --card-ink:#2b2456;
+  --card-edge:#e3d7bf;
+  --right:#3fe0a0;
+  --wrong:#ff7a9a;
+  --shadow:rgba(4,6,30,.55);
+  --font-display:"Jua","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  --font-body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  --font-letter:"Fredoka","Jua","Arial Rounded MT Bold",Arial,sans-serif;
+  --font-emoji:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{
+  margin:0;
+  background-color:var(--night);
+  background-image:linear-gradient(180deg,var(--night) 0%,var(--night-2) 100%);
+  background-attachment:fixed;
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.5;
+  word-break:keep-all;
+  overflow-wrap:break-word;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+  overflow-x:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+button{font:inherit;color:inherit;touch-action:manipulation}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+
+/* night sky */
+.sky{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.sky::before{
+  content:"";position:absolute;inset:0;
+  background-image:
+    radial-gradient(circle at 6% 14%, #fff 0 1.2px, transparent 2px),
+    radial-gradient(circle at 18% 6%, #fff 0 1px, transparent 1.8px),
+    radial-gradient(circle at 27% 22%, #fff 0 1.4px, transparent 2.2px),
+    radial-gradient(circle at 41% 9%, #fff 0 1px, transparent 1.8px),
+    radial-gradient(circle at 55% 18%, #fff 0 1.2px, transparent 2px),
+    radial-gradient(circle at 68% 5%, #fff 0 1.5px, transparent 2.3px),
+    radial-gradient(circle at 79% 16%, #fff 0 1px, transparent 1.8px),
+    radial-gradient(circle at 92% 8%, #fff 0 1.3px, transparent 2.1px),
+    radial-gradient(circle at 11% 44%, #fff 0 1px, transparent 1.8px),
+    radial-gradient(circle at 88% 38%, #fff 0 1.2px, transparent 2px),
+    radial-gradient(circle at 4% 72%, #fff 0 1px, transparent 1.8px),
+    radial-gradient(circle at 95% 66%, #fff 0 1.3px, transparent 2.1px),
+    radial-gradient(circle at 33% 88%, #fff 0 1px, transparent 1.8px),
+    radial-gradient(circle at 72% 92%, #fff 0 1.2px, transparent 2px);
+  opacity:.55;
+  animation:twinkle 5s ease-in-out infinite alternate;
+}
+.sky::after{
+  content:"";position:absolute;left:-15%;right:-15%;top:-8%;height:42%;
+  background:linear-gradient(100deg,transparent 8%,rgba(69,240,196,.16) 30%,rgba(143,109,255,.2) 55%,rgba(255,139,215,.12) 76%,transparent 92%);
+  filter:blur(42px);
+  animation:sway 18s ease-in-out infinite alternate;
+}
+
+.app{max-width:1080px;margin:0 auto;padding-block:14px 32px;min-height:100%;display:flex;flex-direction:column;overflow-x:clip}
+.screen{display:flex;flex-direction:column;gap:16px;flex:1}
+
+/* buttons */
+.cta{
+  appearance:none;border:0;cursor:pointer;
+  font-family:var(--font-display);font-size:22px;line-height:1.2;
+  padding:14px 30px;min-height:58px;border-radius:999px;
+  color:var(--night);
+  background:linear-gradient(110deg,var(--aurora-a),var(--aurora-b) 62%,var(--aurora-c));
+  box-shadow:0 0 26px rgba(69,240,196,.32),0 8px 20px var(--shadow);
+  transition:transform .15s;
+}
+.cta:active{transform:scale(.97)}
+.ghost{
+  appearance:none;cursor:pointer;background:transparent;
+  border:1px dashed var(--line);color:var(--muted);
+  font-family:var(--font-display);font-size:17px;
+  padding:10px 16px;min-height:46px;border-radius:14px;
+}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;background:rgba(0,0,0,.18)}
+.seg button{
+  appearance:none;border:0;background:transparent;cursor:pointer;
+  color:var(--muted);font-family:var(--font-display);font-size:16px;
+  padding:7px 13px;min-height:40px;border-radius:999px;
+}
+.seg button[aria-checked="true"]{background:var(--ink);color:var(--night)}
+
+/* ---------- setup ---------- */
+.setup{max-width:560px;width:100%;margin:0 auto}
+.hero{display:grid;justify-items:center;text-align:center;gap:8px}
+.hero h1{
+  margin:0;font-family:var(--font-display);font-weight:400;
+  font-size:clamp(34px,9vw,52px);line-height:1.1;text-wrap:balance;
+  text-shadow:0 0 22px rgba(143,109,255,.6);
+}
+.hero h1 .abc{font-family:var(--font-letter);font-weight:700;color:var(--gold);text-shadow:0 0 22px rgba(255,214,110,.55)}
+.lede{margin:0;color:var(--muted);font-size:17px;max-width:28em;text-wrap:balance}
+.example{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 8px;font-family:var(--font-display);font-size:16px}
+.example .chip{padding:3px 11px;border-radius:999px;border:1px solid var(--line);background:var(--glass)}
+.example .chip i{font-style:normal;font-family:var(--font-emoji);margin-right:4px}
+.example .arrow{color:var(--aurora-a)}
+.example .answer{color:var(--gold);font-family:var(--font-letter);font-weight:700;font-size:22px;line-height:1}
+.how{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;counter-reset:step}
+.how li{
+  counter-increment:step;display:grid;justify-items:center;align-content:start;gap:6px;
+  text-align:center;font-size:15px;line-height:1.35;color:var(--muted);
+  padding:12px 6px;border-radius:16px;background:var(--glass);
+}
+.how li::before{
+  content:counter(step);width:30px;height:30px;display:grid;place-items:center;border-radius:50%;
+  font-family:var(--font-display);font-size:17px;color:var(--night);
+  background:linear-gradient(135deg,var(--aurora-a),var(--aurora-b));
+}
+.how b{color:var(--ink);font-weight:400;font-family:var(--font-display)}
+.panel{
+  display:grid;gap:14px;padding:18px;border-radius:22px;
+  background:var(--panel);border:1px solid var(--line);
+  box-shadow:0 12px 40px var(--shadow);
+}
+.panel h2{margin:0;font-family:var(--font-display);font-weight:400;font-size:22px}
+.check{display:flex;align-items:center;gap:8px;cursor:pointer;min-height:40px;font-family:var(--font-display);font-size:16px;color:var(--muted)}
+.check input{width:20px;height:20px;margin:0;flex:none;accent-color:var(--aurora-a)}
+.help{margin:0;font-size:14px;line-height:1.5;color:var(--muted)}
+.row-setting{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.label{font-family:var(--font-display);font-size:17px}
+.note{margin:0;font-size:14px;color:var(--gold)}
+.setup .cta{align-self:center;min-width:220px}
+
+/* ---------- mystery box ---------- */
+.stage{position:relative;display:grid;place-items:center;padding-block:24px 4px;isolation:isolate;width:100%}
+.stage[role="button"]{cursor:pointer;border-radius:24px}
+.aurora{position:absolute;inset:-18% 0 -8%;z-index:-1;pointer-events:none;filter:blur(22px)}
+.aurora i{position:absolute;border-radius:50%;mix-blend-mode:screen;animation:drift 9s ease-in-out infinite alternate}
+.aurora i:nth-child(1){width:66%;height:70%;left:4%;top:14%;background:radial-gradient(closest-side,var(--aurora-a),transparent)}
+.aurora i:nth-child(2){width:62%;height:76%;right:2%;top:2%;background:radial-gradient(closest-side,var(--aurora-b),transparent);animation-duration:11s;animation-delay:-4s}
+.aurora i:nth-child(3){width:48%;height:56%;left:28%;top:34%;background:radial-gradient(closest-side,var(--aurora-c),transparent);animation-duration:13s;animation-delay:-7s;opacity:.8}
+.aurora::after{
+  content:"";position:absolute;left:50%;top:52%;width:min(70%,260px);aspect-ratio:1;border-radius:50%;
+  translate:-50% -50%;opacity:.7;
+  background:conic-gradient(from 0deg,var(--aurora-a),var(--aurora-b),var(--aurora-c),var(--aurora-a));
+  -webkit-mask:radial-gradient(closest-side,transparent 52%,#000 64%,transparent 100%);
+          mask:radial-gradient(closest-side,transparent 52%,#000 64%,transparent 100%);
+  animation:spin 14s linear infinite;
+}
+.stage.glow .aurora{animation:flare 1s ease-out}
+.beams{
+  position:absolute;left:50%;top:52%;z-index:-1;
+  width:min(100%,340px);aspect-ratio:1;border-radius:50%;
+  translate:-50% -50%;scale:.2;opacity:0;
+  background:repeating-conic-gradient(from 0deg,rgba(255,214,110,.55) 0 7deg,transparent 7deg 22deg);
+  -webkit-mask:radial-gradient(closest-side,#000 25%,transparent 72%);
+          mask:radial-gradient(closest-side,#000 25%,transparent 72%);
+  transition:opacity .6s,scale .9s cubic-bezier(.2,1.2,.4,1);
+}
+.stage.solved .beams{opacity:1;scale:1;animation:spin 16s linear infinite}
+
+.box{position:relative;width:clamp(132px,36vw,180px);aspect-ratio:1.25;container-type:inline-size}
+.box.puff{animation:puff .55s ease-out}
+.box.shake{animation:shake .5s ease-in-out}
+.box .body{
+  position:absolute;left:0;right:0;bottom:0;height:66%;
+  display:grid;place-items:center;overflow:hidden;
+  border-radius:12px 12px 18px 18px;
+  background:
+    radial-gradient(circle at 18% 30%,rgba(255,255,255,.55) 0 1.2px,transparent 2px),
+    radial-gradient(circle at 80% 22%,rgba(255,255,255,.45) 0 1px,transparent 1.8px),
+    radial-gradient(circle at 70% 78%,rgba(255,255,255,.4) 0 1.2px,transparent 2px),
+    radial-gradient(circle at 28% 84%,rgba(255,255,255,.35) 0 1px,transparent 1.8px),
+    linear-gradient(165deg,var(--box-mid),var(--box-deep) 70%);
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,.07),
+    inset 0 -10px 24px rgba(0,0,0,.35),
+    0 0 22px rgba(143,109,255,.6),
+    0 0 60px rgba(69,240,196,.28);
+}
+.qmark{
+  font-family:var(--font-display);font-size:46cqi;line-height:1;color:var(--ink);
+  text-shadow:0 0 10px var(--aurora-a),0 0 26px var(--aurora-b);
+  animation:qpulse 2.4s ease-in-out infinite;
+  transition:opacity .3s;
+}
+.box.open .qmark{animation:none;opacity:0}
+.box .lid{
+  position:absolute;left:-7%;right:-7%;top:12%;height:22%;z-index:2;
+  border-radius:12px;
+  background:linear-gradient(180deg,var(--box-top),var(--box-mid));
+  border-bottom:3px solid var(--gold);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.12),0 0 18px rgba(143,109,255,.55);
+  transform-origin:15% 100%;
+  transition:transform .75s cubic-bezier(.2,1.3,.4,1),opacity .6s;
+}
+.box .lid::after{
+  content:"";position:absolute;left:50%;top:-38%;width:20%;aspect-ratio:1;
+  translate:-50% 0;rotate:45deg;border-radius:4px;
+  background:linear-gradient(135deg,var(--aurora-a),var(--aurora-b));
+  box-shadow:0 0 14px var(--aurora-a);
+}
+.box.open .lid{transform:translate(-26%,-140%) rotate(-30deg);opacity:0}
+.reveal{
+  position:absolute;left:50%;bottom:26%;z-index:3;
+  font-family:var(--font-letter);font-weight:700;font-size:64cqi;line-height:1;
+  color:var(--gold);
+  text-shadow:0 0 16px rgba(255,214,110,.9),0 0 38px rgba(255,139,215,.6);
+  translate:-50% 20%;scale:.3;opacity:0;
+  transition:translate .8s cubic-bezier(.2,1.5,.4,1) .12s,scale .8s cubic-bezier(.2,1.5,.4,1) .12s,opacity .35s .12s;
+}
+.box.open .reveal{translate:-50% -42%;scale:1;opacity:1}
+
+/* ---------- play ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.scores{display:flex;gap:8px;flex-wrap:wrap;min-width:0}
+.score{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px 5px 8px;border-radius:999px;border:1px solid var(--line);
+  font-family:var(--font-display);font-size:16px;color:var(--muted);
+  transition:background .3s,border-color .3s,color .3s;
+}
+.score .av{font-family:var(--font-emoji);font-size:20px;line-height:1}
+.score .st{color:var(--gold);font-variant-numeric:tabular-nums}
+.score.active{color:var(--ink);border-color:var(--gold);background:rgba(255,214,110,.12)}
+.top-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.progress{font-family:var(--font-display);font-size:15px;color:var(--muted);font-variant-numeric:tabular-nums;padding-inline:4px}
+.icon-btn{
+  appearance:none;cursor:pointer;border:1px solid var(--line);background:var(--glass);color:var(--ink);
+  border-radius:999px;min-height:40px;min-width:40px;padding:0 12px;
+  font-family:var(--font-display);font-size:15px;
+}
+.icon-btn.armed{border-color:var(--aurora-c);color:var(--aurora-c)}
+.music-btn{display:inline-flex;align-items:center;gap:7px;color:var(--muted)}
+.music-btn.on{color:var(--aurora-a);border-color:var(--aurora-a)}
+.eq{display:inline-flex;align-items:flex-end;gap:2px;height:14px}
+.eq i{width:3px;height:30%;border-radius:2px;background:currentColor}
+.music-btn.on .eq i{animation:eq .8s ease-in-out infinite}
+.music-btn.on .eq i:nth-child(2){animation-delay:-.27s}
+.music-btn.on .eq i:nth-child(3){animation-delay:-.54s}
+
+/* A–Z track */
+.strip{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:4px}
+.strip li{
+  aspect-ratio:1;display:grid;place-items:center;border-radius:8px;
+  background:rgba(255,255,255,.04);color:var(--line);
+  font-family:var(--font-letter);font-weight:600;font-size:clamp(12px,3.6vw,18px);line-height:1;
+}
+.strip li.done{color:var(--night);background:linear-gradient(135deg,var(--aurora-a),var(--aurora-b))}
+.strip li.now{color:var(--gold);box-shadow:inset 0 0 0 2px var(--gold);animation:qpulse 1.6s ease-in-out infinite}
+@media (min-width:760px){.strip{grid-template-columns:repeat(26,minmax(0,1fr))}}
+
+.arena{display:grid;gap:12px;align-items:start}
+.riddle{display:grid;gap:10px;justify-items:center}
+
+.status{
+  margin:0;min-height:2.4em;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 10px;
+  text-align:center;font-family:var(--font-display);font-size:19px;line-height:1.2;color:var(--muted);text-wrap:balance;
+}
+.status.win{color:var(--gold);font-size:24px}
+.status .pair{font-family:var(--font-letter);font-weight:700;font-size:32px;color:var(--ink);letter-spacing:.06em}
+.status .stars{letter-spacing:.06em}
+.status .stars .off{color:var(--line)}
+
+.hints{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;width:100%;min-height:58px;perspective:600px}
+.hint{
+  appearance:none;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 18px 8px 12px;min-height:58px;border-radius:999px;
+  border:2px solid var(--line);background:rgba(255,255,255,.07);color:var(--ink);
+  font-family:var(--font-display);font-size:clamp(20px,5.4vw,26px);line-height:1.1;
+  box-shadow:0 6px 16px var(--shadow);
+  transition:border-color .2s,background .2s,transform .15s;
+}
+.hint .em{font-family:var(--font-emoji);font-size:1.3em;line-height:1}
+.hints.en .hint{border-color:rgba(255,214,110,.45)}
+.hints.en .wd{font-family:var(--font-letter);font-weight:600}
+.hint .lead{color:var(--gold);font-weight:700}
+.hint:active{transform:scale(.96)}
+.hints.pop .hint{animation:chipIn .6s cubic-bezier(.2,1.3,.4,1) backwards;animation-delay:var(--d,0ms)}
+.hints.flip .hint{animation:flip .5s ease-out backwards;animation-delay:var(--d,0ms)}
+.hints .hint.tap{animation:nudge .45s ease-out}
+
+.switch{
+  position:relative;display:inline-flex;align-items:center;gap:10px;cursor:pointer;
+  min-height:46px;padding:4px 16px 4px 6px;border-radius:999px;
+  border:1px solid var(--line);background:rgba(0,0,0,.2);
+  font-family:var(--font-display);font-size:18px;color:var(--ink);
+}
+.switch input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.switch .track{position:relative;width:48px;height:28px;border-radius:999px;background:var(--line);transition:background .2s;flex:none}
+.switch .track::after{
+  content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;
+  background:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.35);transition:transform .2s;
+}
+.switch input:checked + .track{background:linear-gradient(90deg,var(--aurora-a),var(--aurora-b))}
+.switch input:checked + .track::after{transform:translateX(20px)}
+.switch input:focus-visible + .track{outline:3px solid var(--gold);outline-offset:2px}
+.switch .abc{font-family:var(--font-letter);font-weight:600;color:var(--gold)}
+
+.answers{display:grid;gap:12px;width:100%;max-width:560px;margin-inline:auto}
+.ask{margin:0;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;text-align:center;font-family:var(--font-display);font-size:18px;color:var(--muted)}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:999px;font-family:var(--font-display);font-size:19px;color:var(--night)}
+.badge b{font-family:var(--font-letter);font-weight:700}
+.badge.upper{background:var(--gold)}
+.badge.lower{background:var(--aurora-a)}
+.cards{display:grid;gap:10px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.cards[data-n="4"]{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{
+  appearance:none;border:0;cursor:pointer;container-type:inline-size;
+  aspect-ratio:1;padding:0;border-radius:20px;
+  display:grid;place-items:center;
+  background:var(--card);
+  box-shadow:0 4px 0 var(--card-edge),0 10px 20px var(--shadow);
+  transition:transform .15s,opacity .4s,filter .4s,box-shadow .3s;
+}
+.card .lt{font-family:var(--font-letter);font-weight:600;font-size:52px;font-size:clamp(40px,62cqi,120px);line-height:1;color:var(--card-ink)}
+.card:nth-child(4n+1) .lt{color:#5b3fd6}
+.card:nth-child(4n+2) .lt{color:#0d8a74}
+.card:nth-child(4n+3) .lt{color:#cf2c74}
+.card:nth-child(4n+4) .lt{color:#c45f00}
+.card:active{transform:scale(.95)}
+.card.nope{opacity:.3;filter:grayscale(1);animation:nope .45s ease-in-out}
+.card.right{transform:scale(1.06);box-shadow:0 0 0 4px var(--right),0 0 34px var(--right)}
+.cards.done .card:not(.right){opacity:.2}
+
+@media (min-width:860px){
+  .arena{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:40px;align-items:center;flex:1}
+  .ask{font-size:20px}
+}
+
+/* try again */
+.toast{
+  position:fixed;left:50%;top:42%;z-index:40;translate:-50% -50%;
+  display:grid;justify-items:center;gap:2px;pointer-events:none;
+  padding:16px 30px 18px;border-radius:28px;text-align:center;
+  background:rgba(23,27,76,.94);border:2px solid var(--wrong);
+  box-shadow:0 0 44px rgba(255,122,154,.45),0 20px 40px var(--shadow);
+}
+.toast.show{animation:toastIn 1.4s ease forwards}
+.toast .face{font-family:var(--font-emoji);font-size:76px;line-height:1.1;animation:wobble .6s ease-out}
+.toast .say{font-family:var(--font-letter);font-weight:700;font-size:36px;line-height:1.1;color:var(--wrong);white-space:nowrap}
+
+/* end */
+.end{max-width:640px;width:100%;margin:0 auto;text-align:center;justify-content:center}
+.end-title{margin:0;font-family:var(--font-display);font-weight:400;font-size:clamp(30px,8vw,46px);line-height:1.15;text-wrap:balance;text-shadow:0 0 22px rgba(143,109,255,.6)}
+.end-sub{margin:0;color:var(--muted);font-size:17px}
+.end-card{display:grid;gap:10px;padding:16px;border-radius:20px;background:var(--panel);border:1px solid var(--line)}
+.end-stars{font-family:var(--font-display);font-size:30px;color:var(--gold)}
+.end-letters{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.end-letters span{
+  min-width:40px;padding:4px 8px;border-radius:12px;
+  background:var(--glass);border:1px solid var(--line);
+  font-family:var(--font-letter);font-weight:600;font-size:24px;line-height:1.3;
+}
+.end-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+
+/* confetti */
+.confetti{position:fixed;inset:0;z-index:25;pointer-events:none;overflow:hidden}
+.confetti i{position:absolute;top:-18px;width:9px;height:14px;border-radius:2px;animation:fall var(--t,2.2s) cubic-bezier(.25,.6,.4,1) forwards}
+
+@keyframes twinkle{from{opacity:.3}to{opacity:.7}}
+@keyframes sway{from{transform:translateX(-6%) skewY(-3deg)}to{transform:translateX(6%) skewY(3deg)}}
+@keyframes drift{0%{transform:translate(-8%,4%) scale(1)}50%{transform:translate(6%,-6%) scale(1.15)}100%{transform:translate(10%,6%) scale(.95)}}
+@keyframes flare{0%{filter:blur(22px)}30%{filter:blur(16px) brightness(1.7)}100%{filter:blur(22px)}}
+@keyframes spin{to{rotate:360deg}}
+@keyframes qpulse{0%,100%{transform:scale(1);opacity:.88}50%{transform:scale(1.08);opacity:1}}
+@keyframes puff{0%{transform:scale(1)}35%{transform:scale(1.08,.94)}70%{transform:scale(.97,1.04)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px) rotate(-3deg)}40%{transform:translateX(8px) rotate(3deg)}60%{transform:translateX(-6px) rotate(-2deg)}80%{transform:translateX(4px)}}
+@keyframes nope{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
+@keyframes chipIn{0%{opacity:0;transform:translateY(26px) scale(.6)}60%{opacity:1}100%{opacity:1;transform:none}}
+@keyframes flip{0%{opacity:.2;transform:rotateX(90deg)}100%{opacity:1;transform:none}}
+@keyframes nudge{0%,100%{transform:none}30%{transform:scale(1.12)}60%{transform:scale(.96)}}
+@keyframes eq{0%,100%{height:25%}50%{height:100%}}
+@keyframes wobble{0%{transform:scale(.5) rotate(0)}35%{transform:scale(1.15) rotate(-14deg)}65%{transform:rotate(10deg)}100%{transform:none}}
+@keyframes toastIn{0%{opacity:0;transform:scale(.6)}14%{opacity:1;transform:scale(1.08)}24%{transform:scale(1)}78%{opacity:1}100%{opacity:0;transform:scale(.96)}}
+@keyframes fall{to{transform:translate(var(--dx,0),105vh) rotate(var(--r,540deg))}}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<div class="sky" aria-hidden="true"></div>
+
+<main class="app">
+  <!-- 시작 화면 -->
+  <section class="screen setup" id="setup">
+    <header class="hero">
+      <div class="stage" aria-hidden="true">
+        <div class="aurora"><i></i><i></i><i></i></div>
+        <div class="box" id="heroBox">
+          <div class="lid"></div>
+          <div class="body"><span class="qmark">?</span></div>
+        </div>
+      </div>
+      <h1><span class="abc">ABC</span> 알파벳 찾기 파티</h1>
+      <p class="lede">상자 속에 알파벳이 숨어 있어요. 힌트 낱말이 어떤 알파벳으로 시작하는지 생각하고 맞는 카드를 골라요. A부터 Z까지!</p>
+      <p class="example" aria-label="예시: 사과, 개미, 비행기, 정답은 A">
+        <span class="chip"><i aria-hidden="true">🍎</i>사과</span>
+        <span class="chip"><i aria-hidden="true">🐜</i>개미</span>
+        <span class="chip"><i aria-hidden="true">✈️</i>비행기</span>
+        <span class="arrow">→</span>
+        <span class="answer">A a</span>
+      </p>
+    </header>
+
+    <ol class="how">
+      <li><span><b>힌트 낱말</b>을 봐요</span></li>
+      <li><span>영어로 <b>첫 글자</b>를 생각해요</span></li>
+      <li><span>맞는 <b>알파벳 카드</b>를 골라요</span></li>
+    </ol>
+
+    <div class="panel">
+      <h2>게임 설정</h2>
+      <div class="row-setting">
+        <span class="label">알파벳 카드</span>
+        <div class="seg" id="cardSeg" role="radiogroup" aria-label="알파벳 카드 수">
+          <button type="button" role="radio" data-cards="3" aria-checked="false">3장</button>
+          <button type="button" role="radio" data-cards="4" aria-checked="true">4장</button>
+          <button type="button" role="radio" data-cards="6" aria-checked="false">6장</button>
+        </div>
+      </div>
+      <p class="help">알파벳 카드 3장은 쉽고 6장은 어려워요. 카드가 많으면 b·d·p·q처럼 모양이 비슷한 알파벳이 섞여 나와요. 대문자와 소문자는 문제마다 바뀌어요.</p>
+      <div class="row-setting">
+        <span class="label">신나는 음악</span>
+        <div class="seg" id="musicSeg" role="radiogroup" aria-label="배경 음악">
+          <button type="button" role="radio" data-track="abc" aria-checked="true">ABC 리믹스</button>
+          <button type="button" role="radio" data-track="party" aria-checked="false">파티 비트</button>
+          <button type="button" role="radio" data-track="off" aria-checked="false">끄기</button>
+        </div>
+      </div>
+      <label class="check"><input type="checkbox" id="alphaSetup"> 알파벳 보기 (힌트 낱말을 영어로 보여 줘요)</label>
+      <label class="check"><input type="checkbox" id="soundOn" checked> 낱말을 소리로 읽어 줘요</label>
+      <p class="note" id="ttsNote" hidden></p>
+    </div>
+
+    <button type="button" class="cta" id="startBtn">시작하기</button>
+  </section>
+
+  <!-- 게임 화면 -->
+  <section class="screen play" id="play" hidden>
+    <div class="topbar">
+      <div class="scores" id="scores"></div>
+      <div class="top-actions">
+        <span class="progress" id="progress"></span>
+        <button type="button" class="icon-btn music-btn" id="musicBtn"><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span id="musicLabel">음악</span></button>
+        <button type="button" class="icon-btn" id="soundBtn" aria-label="소리 끄기" aria-pressed="true">🔊</button>
+        <button type="button" class="icon-btn" id="homeBtn">처음으로</button>
+      </div>
+    </div>
+
+    <ol class="strip" id="strip" aria-label="A부터 Z까지 찾은 알파벳"></ol>
+
+    <div class="arena">
+      <div class="riddle">
+        <div class="stage" id="stage" role="button" tabindex="0" aria-label="힌트 다시 듣기">
+          <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="beams" aria-hidden="true"></div>
+          <div class="box" id="box" aria-hidden="true">
+            <div class="reveal" id="reveal"></div>
+            <div class="lid"></div>
+            <div class="body"><span class="qmark">?</span></div>
+          </div>
+        </div>
+        <p class="status" id="status" aria-live="polite"></p>
+        <div class="hints" id="hints"></div>
+        <label class="switch"><input type="checkbox" id="alphaView"><span class="track" aria-hidden="true"></span><span>알파벳 보기 <span class="abc">Abc</span></span></label>
+      </div>
+
+      <div class="answers">
+        <p class="ask"><span class="badge" id="caseBadge"></span><span id="askText"></span></p>
+        <div class="cards" id="cards"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 끝 화면 -->
+  <section class="screen end" id="end" hidden>
+    <h2 class="end-title">A부터 Z까지 모두 찾았어요!</h2>
+    <p class="end-sub">알파벳 26개를 전부 찾아서 상자를 활짝 열었어요.</p>
+    <div class="end-card" id="endCard"></div>
+    <div class="end-actions">
+      <button type="button" class="cta" id="againBtn">한 번 더 하기</button>
+      <button type="button" class="ghost" id="setupBtn">처음 화면으로</button>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" hidden>
+  <div class="face" id="toastFace" aria-hidden="true">🙈</div>
+  <div class="say" lang="en">Try again!</div>
+</div>
+
+<div class="confetti" id="confetti" aria-hidden="true"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  // 힌트 낱말: [영어, 한글, 그림]. 한 문제에 3~4개를 골라 보여 줘요.
+  const WORDS = {
+    A: [['apple', '사과', '🍎'], ['ant', '개미', '🐜'], ['airplane', '비행기', '✈️'], ['alligator', '악어', '🐊'], ['avocado', '아보카도', '🥑'], ['ambulance', '구급차', '🚑']],
+    B: [['bear', '곰', '🐻'], ['ball', '공', '⚽'], ['banana', '바나나', '🍌'], ['bus', '버스', '🚌'], ['bee', '벌', '🐝'], ['book', '책', '📖'], ['butterfly', '나비', '🦋']],
+    C: [['cat', '고양이', '🐱'], ['car', '자동차', '🚗'], ['cake', '케이크', '🍰'], ['cow', '소', '🐮'], ['carrot', '당근', '🥕'], ['cookie', '쿠키', '🍪'], ['corn', '옥수수', '🌽']],
+    D: [['dog', '강아지', '🐶'], ['duck', '오리', '🦆'], ['dolphin', '돌고래', '🐬'], ['donut', '도넛', '🍩'], ['dinosaur', '공룡', '🦕'], ['drum', '북', '🥁']],
+    E: [['elephant', '코끼리', '🐘'], ['egg', '달걀', '🥚'], ['eagle', '독수리', '🦅'], ['ear', '귀', '👂'], ['eye', '눈', '👀'], ['earth', '지구', '🌍']],
+    F: [['fish', '물고기', '🐟'], ['frog', '개구리', '🐸'], ['flower', '꽃', '🌸'], ['fox', '여우', '🦊'], ['fire', '불', '🔥'], ['fork', '포크', '🍴']],
+    G: [['grapes', '포도', '🍇'], ['giraffe', '기린', '🦒'], ['gift', '선물', '🎁'], ['guitar', '기타', '🎸'], ['goat', '염소', '🐐'], ['ghost', '유령', '👻']],
+    H: [['horse', '말', '🐴'], ['hat', '모자', '🧢'], ['house', '집', '🏠'], ['heart', '하트', '❤️'], ['hamburger', '햄버거', '🍔'], ['helicopter', '헬리콥터', '🚁']],
+    I: [['ice cream', '아이스크림', '🍦'], ['ice', '얼음', '🧊'], ['island', '섬', '🏝️'], ['insect', '곤충', '🐛']],
+    J: [['juice', '주스', '🧃'], ['jeans', '청바지', '👖'], ['jacket', '재킷', '🧥'], ['jaguar', '재규어', '🐆'], ['joystick', '조이스틱', '🕹️']],
+    K: [['kangaroo', '캥거루', '🦘'], ['key', '열쇠', '🔑'], ['kite', '연', '🪁'], ['king', '왕', '🤴'], ['koala', '코알라', '🐨'], ['kiwi', '키위', '🥝']],
+    L: [['lion', '사자', '🦁'], ['lemon', '레몬', '🍋'], ['leaf', '나뭇잎', '🍃'], ['lollipop', '막대사탕', '🍭'], ['ladybug', '무당벌레', '🐞'], ['lips', '입술', '👄']],
+    M: [['monkey', '원숭이', '🐵'], ['moon', '달', '🌙'], ['milk', '우유', '🥛'], ['mouse', '생쥐', '🐭'], ['mushroom', '버섯', '🍄'], ['map', '지도', '🗺️']],
+    N: [['nose', '코', '👃'], ['noodles', '국수', '🍜'], ['nut', '땅콩', '🥜'], ['nine', '숫자 9', '9️⃣'], ['night', '밤', '🌃']],
+    O: [['orange', '오렌지', '🍊'], ['owl', '부엉이', '🦉'], ['octopus', '문어', '🐙'], ['onion', '양파', '🧅'], ['ox', '황소', '🐂']],
+    P: [['pig', '돼지', '🐷'], ['panda', '판다', '🐼'], ['pizza', '피자', '🍕'], ['penguin', '펭귄', '🐧'], ['pear', '배', '🍐'], ['pencil', '연필', '✏️'], ['pumpkin', '호박', '🎃']],
+    Q: [['queen', '여왕', '👸'], ['question', '질문', '❓'], ['quiet', '조용히', '🤫'], ['quiz', '퀴즈', '📝']],
+    R: [['rabbit', '토끼', '🐰'], ['rainbow', '무지개', '🌈'], ['robot', '로봇', '🤖'], ['rocket', '로켓', '🚀'], ['rose', '장미', '🌹'], ['ring', '반지', '💍']],
+    S: [['sun', '해', '☀️'], ['star', '별', '⭐'], ['snake', '뱀', '🐍'], ['strawberry', '딸기', '🍓'], ['snowman', '눈사람', '⛄'], ['sock', '양말', '🧦']],
+    T: [['tiger', '호랑이', '🐯'], ['train', '기차', '🚂'], ['tree', '나무', '🌳'], ['turtle', '거북이', '🐢'], ['tomato', '토마토', '🍅'], ['teddy bear', '곰 인형', '🧸']],
+    U: [['umbrella', '우산', '☂️'], ['unicorn', '유니콘', '🦄'], ['UFO', '유에프오', '🛸'], ['up', '위로', '⬆️']],
+    V: [['violin', '바이올린', '🎻'], ['volcano', '화산', '🌋'], ['van', '승합차', '🚐'], ['vegetables', '채소', '🥦'], ['volleyball', '배구공', '🏐']],
+    W: [['whale', '고래', '🐳'], ['watermelon', '수박', '🍉'], ['watch', '손목시계', '⌚'], ['wolf', '늑대', '🐺'], ['water', '물', '💧']],
+    X: [['xylophone', '실로폰', '🎶'], ['X-ray', '엑스레이', '🦴'], ['Xmas', '크리스마스', '🎄'], ['X mark', '엑스 표시', '❌']],
+    Y: [['yo-yo', '요요', '🪀'], ['yarn', '털실', '🧶'], ['yellow', '노란색', '💛'], ['yacht', '요트', '⛵'], ['yak', '야크', '🐃']],
+    Z: [['zebra', '얼룩말', '🦓'], ['zero', '숫자 0', '0️⃣'], ['zipper', '지퍼', '🤐'], ['zombie', '좀비', '🧟']],
+  };
+  // 모양이 비슷해서 헷갈리기 쉬운 알파벳. 카드가 많을수록 이 친구들이 더 섞여 나와요.
+  const LOOK_UPPER = { A: 'HVR', B: 'DPR', C: 'GOQ', D: 'OBP', E: 'FBL', F: 'EPT', G: 'CQO', H: 'NAK', I: 'LTJ', J: 'ILU', K: 'XRH', L: 'ITJ', M: 'NWH', N: 'MHZ', O: 'QCD', P: 'RBF', Q: 'OGC', R: 'PBK', S: 'ZCG', T: 'ILF', U: 'VJO', V: 'UWY', W: 'MVN', X: 'KYZ', Y: 'VXT', Z: 'SNX' };
+  const LOOK_LOWER = { a: 'oed', b: 'dpqh', c: 'eoa', d: 'bqpa', e: 'cao', f: 'tlj', g: 'qpy', h: 'nbk', i: 'jlt', j: 'igy', k: 'hxl', l: 'itj', m: 'nwu', n: 'mhu', o: 'ace', p: 'qbd', q: 'pgd', r: 'nvt', s: 'zce', t: 'fli', u: 'nvw', v: 'uwy', w: 'mvu', x: 'kyz', y: 'vgj', z: 'sxn' };
+  const OOPS = ['🙈', '🤔', '😜', '🙃', '😅', '🐵', '🤭'];
+  const TRACK_IDS = ['abc', 'party', 'off'];
+  const TRACK_SHORT = { abc: 'ABC', party: '파티', off: '음악 끔' };
+  const TRACK_NAME = { abc: 'ABC 리믹스', party: '파티 비트', off: '꺼짐' };
+  const STORE_KEY = 'alphabet-party-v1';
+  const NEXT_DELAY = 3000; // 맞힌 뒤 다음 문제로 넘어가기까지 (빵빠레가 끝날 즈음)
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  const shuffle = arr => {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const replay = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+  const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const show = (letter, upper) => (upper ? letter : letter.toLowerCase());
+  const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
+
+  /* ---------- 설정 ---------- */
+  const defaults = () => ({ cards: 4, alpha: false, sound: true, music: 'abc' });
+  function sanitize(s) {
+    const d = defaults();
+    if (!s || typeof s !== 'object') return d;
+    return {
+      cards: [3, 4, 6].includes(s.cards) ? s.cards : d.cards,
+      alpha: !!s.alpha,
+      sound: s.sound !== false,
+      music: TRACK_IDS.includes(s.music) ? s.music : d.music,
+    };
+  }
+  const state = { screen: 'setup', settings: defaults(), game: null };
+  function loadSettings() {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (raw) state.settings = sanitize(JSON.parse(raw));
+    } catch (e) { /* 저장소를 못 쓰면 기본값으로 */ }
+  }
+  function saveSettings() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state.settings)); } catch (e) { /* 무시 */ }
+  }
+
+  /* ---------- 오디오 ---------- */
+  let actx = null;
+  let noiseBuf = null;
+  function audio() {
+    if (!actx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      try { actx = new AC(); } catch (e) { return null; }
+      Music.setup(actx);
+    }
+    if (actx.state !== 'running') actx.resume().catch(() => {});
+    return actx;
+  }
+  function noise(ctx) {
+    if (!noiseBuf) {
+      noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    return noiseBuf;
+  }
+  // iOS: 무음 스위치가 켜져 있어도 음악이 들리게
+  function unlockAudio() {
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* 지원 안 함 */ }
+  }
+
+  // 배경 음악: 파일 없이 Web Audio로 직접 연주하는 클럽 비트 (4/4 킥, 박수, 하이햇, 오프비트 베이스)
+  const Music = (() => {
+    let ctx = null, master = null, duckGain = null, pump = null, echo = null, echoSend = null;
+    let timer = 0, nextTime = 0, step = 0, cur = null, ducked = false;
+    const VOL = 0.5;
+    const CH = { C: [60, 64, 67], F: [60, 65, 69], G: [59, 62, 67], Am: [57, 60, 64] };
+    const ROOT = { C: 48, F: 41, G: 43, Am: 45 };
+    // ABC 노래(작자 미상 전래 동요) 멜로디: [박, 음, 길이(박)]
+    const ABC_TUNE = [
+      [0, 72, 1], [1, 72, 1], [2, 79, 1], [3, 79, 1], [4, 81, 1], [5, 81, 1], [6, 79, 2],
+      [8, 77, 1], [9, 77, 1], [10, 76, 1], [11, 76, 1], [12, 74, .5], [12.5, 74, .5], [13, 74, .5], [13.5, 74, .5], [14, 72, 2],
+      [16, 79, 1], [17, 79, 1], [18, 77, 2], [20, 76, 1], [21, 76, 1], [22, 74, 2],
+      [24, 79, 1], [25, 79, 1], [26, 77, 2], [28, 76, 1], [29, 76, 1], [30, 74, 2],
+      [32, 72, 1], [33, 72, 1], [34, 79, 1], [35, 79, 1], [36, 81, 1], [37, 81, 1], [38, 79, 2],
+      [40, 77, 1], [41, 77, 1], [42, 76, 1], [43, 76, 1], [44, 74, 1], [45, 74, 1], [46, 72, 2],
+    ];
+    const ABC_AT = new Map(ABC_TUNE.map(([b, m, d]) => [Math.round(b * 4), [m, d]]));
+
+    const TRACKS = {
+      abc: {
+        bpm: 124, bars: 20, loopFrom: 4,
+        // 마디마다 [앞 두 박, 뒤 두 박] 화음. 0~3 인트로, 4~15 노래, 16~19 드롭
+        chords: ['C C', 'F F', 'G G', 'C G',
+          'C C', 'F C', 'F C', 'G C', 'C F', 'C G', 'C F', 'C G', 'C C', 'F C', 'F C', 'G C',
+          'C C', 'F F', 'G G', 'C G'].map(s => s.split(' ')),
+        play(bar, s, t, sd) {
+          const ch = this.chords[bar][s < 8 ? 0 : 1];
+          const verse = bar >= 4 && bar < 16;
+          drums(t, s, bar === 3 || bar === 19, bar === 0);
+          if (s % 4 === 2) {
+            bass(t, ROOT[ch], sd * 1.7);
+            stab(t, CH[ch], sd * 1.2, verse ? 0.028 : 0.042);
+          }
+          if (verse) {
+            const n = ABC_AT.get((bar - 4) * 16 + s);
+            if (n) lead(t, n[0], n[1] * 4 * sd * 0.9);
+          } else if (bar >= 16) {
+            pluck(t, CH[ch][[0, 1, 2, 1][s % 4]] + (s % 8 < 4 ? 12 : 24), 0.04);
+          }
+        },
+      },
+      party: {
+        bpm: 126, bars: 8, loopFrom: 0,
+        prog: ['Am', 'F', 'C', 'G'],
+        hook: [
+          [76, 0, 76, 0, 79, 81, 0, 0],
+          [84, 0, 81, 0, 79, 77, 0, 0],
+          [76, 0, 76, 0, 79, 84, 0, 0],
+          [83, 0, 81, 0, 79, 74, 0, 79],
+        ],
+        play(bar, s, t, sd) {
+          const ch = this.prog[bar % 4];
+          drums(t, s, bar === 7, false);
+          if (s % 4 === 2) bass(t, ROOT[ch], sd * 1.7);
+          if (s === 0) stab(t, CH[ch], sd * 5, 0.03);
+          if (s === 10) stab(t, CH[ch], sd * 1.5, 0.026);
+          pluck(t, CH[ch][[0, 1, 2, 1, 2, 0, 1, 2][s % 8]] + 12, 0.034);
+          if (bar >= 4 && s % 2 === 0) {
+            const m = this.hook[bar % 4][s / 2];
+            if (m) lead(t, m, sd * 1.7);
+          }
+        },
+      },
+    };
+
+    function osc(type, freq, t, dur) {
+      const o = ctx.createOscillator();
+      o.type = type;
+      o.frequency.value = freq;
+      o.start(t);
+      o.stop(t + dur);
+      return o;
+    }
+    function hit(t, type, freq, vol, dur, q) {
+      const src = ctx.createBufferSource();
+      src.buffer = noise(ctx);
+      const f = ctx.createBiquadFilter();
+      f.type = type;
+      f.frequency.value = freq;
+      if (q) f.Q.value = q;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      src.connect(f); f.connect(g); g.connect(master);
+      src.start(t, Math.random() * 1.5, dur + 0.05);
+    }
+    function kick(t) {
+      const o = osc('sine', 150, t, 0.45);
+      o.frequency.setValueAtTime(150, t);
+      o.frequency.exponentialRampToValueAtTime(46, t + 0.12);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.9, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+      o.connect(g); g.connect(master);
+      hit(t, 'highpass', 3000, 0.1, 0.012); // 작은 스피커에서도 킥이 들리게
+      // 킥이 칠 때 베이스·화음을 살짝 눌러 주는 '펌핑'
+      pump.gain.cancelScheduledValues(t);
+      pump.gain.setValueAtTime(0.3, t);
+      pump.gain.linearRampToValueAtTime(1, t + 0.24);
+    }
+    function clap(t, v) {
+      hit(t, 'bandpass', 1500, v, 0.14, 0.8);
+      hit(t + 0.011, 'bandpass', 1150, v * 0.8, 0.18, 0.8);
+    }
+    const hat = (t, open) => hit(t, 'highpass', 8000, open ? 0.08 : 0.035, open ? 0.14 : 0.03);
+    function drums(t, s, build, sparse) {
+      const fill = build && s >= 8;
+      if (s % 4 === 0 && !(build && s >= 12)) kick(t);
+      if (fill) clap(t, 0.08 + (s - 8) * 0.035);
+      else if (s === 4 || s === 12) clap(t, 0.32);
+      if (!sparse) hat(t, s % 4 === 2);
+    }
+    function bass(t, m, dur) {
+      const f = ctx.createBiquadFilter();
+      f.type = 'lowpass';
+      f.Q.value = 6;
+      f.frequency.setValueAtTime(1800, t);
+      f.frequency.exponentialRampToValueAtTime(240, t + dur);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.3, t + 0.006);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      osc('sawtooth', midiHz(m), t, dur + 0.05).connect(f);
+      const up = ctx.createGain();
+      up.gain.value = 0.35;
+      osc('square', midiHz(m + 12), t, dur + 0.05).connect(up);
+      up.connect(f);
+      f.connect(g); g.connect(pump);
+    }
+    function stab(t, notes, dur, vol) {
+      const f = ctx.createBiquadFilter();
+      f.type = 'lowpass';
+      f.Q.value = 3;
+      f.frequency.setValueAtTime(3000, t);
+      f.frequency.exponentialRampToValueAtTime(700, t + dur);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      notes.forEach(m => [-10, 10].forEach(c => {
+        const o = osc('sawtooth', midiHz(m), t, dur + 0.05);
+        o.detune.value = c;
+        o.connect(f);
+      }));
+      f.connect(g); g.connect(pump);
+    }
+    function lead(t, m, dur) {
+      const f = ctx.createBiquadFilter();
+      f.type = 'lowpass';
+      f.frequency.value = 3600;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.085, t + 0.012);
+      g.gain.setValueAtTime(0.085, t + Math.max(0.03, dur - 0.06));
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.08);
+      osc('square', midiHz(m), t, dur + 0.12).connect(f);
+      const saw = osc('sawtooth', midiHz(m), t, dur + 0.12);
+      saw.detune.value = 9;
+      const sg = ctx.createGain();
+      sg.gain.value = 0.6;
+      saw.connect(sg); sg.connect(f);
+      f.connect(g); g.connect(master); g.connect(echoSend);
+    }
+    function pluck(t, m, vol) {
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+      osc('triangle', midiHz(m), t, 0.22).connect(g);
+      g.connect(pump); g.connect(echoSend);
+    }
+
+    function setup(ac) {
+      ctx = ac;
+      master = ac.createGain();
+      master.gain.value = 0.0001;
+      duckGain = ac.createGain();
+      const comp = ac.createDynamicsCompressor();
+      comp.threshold.value = -18;
+      comp.knee.value = 10;
+      comp.ratio.value = 4;
+      comp.attack.value = 0.004;
+      comp.release.value = 0.18;
+      master.connect(duckGain); duckGain.connect(comp); comp.connect(ac.destination);
+      pump = ac.createGain();
+      pump.connect(master);
+      echo = ac.createDelay(1);
+      echoSend = ac.createGain();
+      echoSend.gain.value = 0.25;
+      echoSend.connect(echo);
+      const fb = ac.createGain();
+      fb.gain.value = 0.32;
+      const damp = ac.createBiquadFilter();
+      damp.type = 'lowpass';
+      damp.frequency.value = 2200;
+      echo.connect(damp); damp.connect(fb); fb.connect(echo); damp.connect(master);
+    }
+    function tick() {
+      const tr = TRACKS[cur];
+      if (!tr) return;
+      const sd = 60 / tr.bpm / 4;
+      if (nextTime < ctx.currentTime - 0.05) nextTime = ctx.currentTime + 0.05;
+      while (nextTime < ctx.currentTime + 0.14) {
+        let bar = Math.floor(step / 16);
+        if (bar >= tr.bars) bar = tr.loopFrom + (bar - tr.loopFrom) % (tr.bars - tr.loopFrom);
+        const s = step % 16;
+        tr.play(bar, s, nextTime, sd);
+        if (s % 4 === 0 && api.onBeat) setTimeout(api.onBeat, Math.max(0, (nextTime - ctx.currentTime) * 1000));
+        nextTime += sd;
+        step++;
+      }
+    }
+    function play(id) {
+      if (!ctx || !TRACKS[id]) return;
+      if (cur === id && timer) return;
+      clearInterval(timer);
+      cur = id;
+      step = 0;
+      const now = ctx.currentTime;
+      nextTime = now + 0.08;
+      echo.delayTime.value = 3 * 60 / TRACKS[id].bpm / 4;
+      master.gain.cancelScheduledValues(now);
+      master.gain.setValueAtTime(0.0001, now);
+      master.gain.exponentialRampToValueAtTime(VOL, now + 0.6);
+      timer = setInterval(tick, 25);
+      tick();
+    }
+    function stop() {
+      if (!ctx || !timer) return;
+      const now = ctx.currentTime;
+      master.gain.cancelScheduledValues(now);
+      master.gain.setValueAtTime(Math.max(master.gain.value, 0.0001), now);
+      master.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+      clearInterval(timer);
+      timer = 0;
+      cur = null;
+    }
+    function duck(on) {
+      if (!ctx || on === ducked) return;
+      ducked = on;
+      const now = ctx.currentTime;
+      duckGain.gain.cancelScheduledValues(now);
+      duckGain.gain.setValueAtTime(duckGain.gain.value, now);
+      duckGain.gain.setTargetAtTime(on ? 0.25 : 1, now, on ? 0.04 : 0.3);
+    }
+    const api = { setup, play, stop, duck, onBeat: null, get playing() { return !!timer; } };
+    return api;
+  })();
+
+  // 목소리나 빵빠레가 나올 때는 음악 소리를 잠깐 줄여요
+  const duckState = { speech: false, until: 0, timer: 0, safety: 0 };
+  function updateDuck() {
+    Music.duck(duckState.speech || performance.now() < duckState.until);
+  }
+  function holdDuck(sec) {
+    duckState.until = Math.max(duckState.until, performance.now() + sec * 1000);
+    updateDuck();
+    clearTimeout(duckState.timer);
+    duckState.timer = setTimeout(updateDuck, duckState.until - performance.now() + 30);
+  }
+  function setSpeech(on) {
+    duckState.speech = on;
+    updateDuck();
+    clearTimeout(duckState.safety);
+    if (on) duckState.safety = setTimeout(() => setSpeech(false), 9000);
+  }
+
+  /* ---------- 효과음 ---------- */
+  let sfxOut = null;
+  function sfxDest(ctx) {
+    if (!sfxOut) {
+      sfxOut = ctx.createGain();
+      sfxOut.gain.value = 0.9;
+      sfxOut.connect(ctx.destination);
+    }
+    return sfxOut;
+  }
+  function brass(ctx, out, m, t, dur, vol) {
+    const f = ctx.createBiquadFilter();
+    f.type = 'lowpass';
+    f.Q.value = 1.5;
+    f.frequency.setValueAtTime(600, t);
+    f.frequency.exponentialRampToValueAtTime(4200, t + 0.05);
+    f.frequency.exponentialRampToValueAtTime(1800, t + dur);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.025);
+    g.gain.setValueAtTime(vol, t + dur * 0.75);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.15);
+    let vib = null;
+    if (dur > 0.5) {
+      const lfo = ctx.createOscillator();
+      lfo.frequency.value = 5.5;
+      vib = ctx.createGain();
+      vib.gain.value = 14;
+      lfo.connect(vib);
+      lfo.start(t + 0.2);
+      lfo.stop(t + dur + 0.2);
+    }
+    [-8, 8].forEach(c => {
+      const o = ctx.createOscillator();
+      o.type = 'sawtooth';
+      o.frequency.value = midiHz(m);
+      o.detune.value = c;
+      if (vib) vib.connect(o.detune);
+      o.connect(f);
+      o.start(t);
+      o.stop(t + dur + 0.2);
+    });
+    f.connect(g); g.connect(out);
+  }
+  function crash(ctx, out, t, dur, vol) {
+    const src = ctx.createBufferSource();
+    src.buffer = noise(ctx);
+    const f = ctx.createBiquadFilter();
+    f.type = 'highpass';
+    f.frequency.value = 5000;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f); f.connect(g); g.connect(out);
+    src.start(t, 0, dur + 0.05);
+  }
+  function boom(ctx, out, t) {
+    const o = ctx.createOscillator();
+    o.frequency.setValueAtTime(130, t);
+    o.frequency.exponentialRampToValueAtTime(48, t + 0.25);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.7, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+    o.connect(g); g.connect(out);
+    o.start(t);
+    o.stop(t + 0.65);
+  }
+  // 빵빠레: 따-따-따-따안!
+  function fanfare(big) {
+    if (!state.settings.sound) return;
+    const ctx = audio();
+    if (!ctx) return;
+    const out = sfxDest(ctx);
+    const t = ctx.currentTime + 0.03;
+    holdDuck(big ? 3 : 2);
+    [[67, 0, .1], [67, .12, .1], [67, .24, .1], [72, .38, .16], [76, .56, .16]].forEach(([m, o, d]) => brass(ctx, out, m, t + o, d, 0.11));
+    let top = 0.76;
+    if (big) {
+      [[79, .76, .14], [76, .94, .14]].forEach(([m, o, d]) => brass(ctx, out, m, t + o, d, 0.11));
+      top = 1.12;
+    }
+    (big ? [72, 76, 79, 84, 88] : [72, 76, 79, 84]).forEach(m => brass(ctx, out, m, t + top, big ? 1.5 : 1.0, 0.075));
+    crash(ctx, out, t + top, 1.4, 0.2);
+    boom(ctx, out, t + top);
+  }
+  function sfx(kind) {
+    if (!state.settings.sound) return;
+    const ctx = audio();
+    if (!ctx) return;
+    const out = sfxDest(ctx);
+    const t = ctx.currentTime + 0.02;
+    if (kind === 'wrong') {
+      // 와-와 (뾰로롱 내려가는 소리)
+      holdDuck(0.8);
+      [[311, 294, 0, 0.22], [262, 196, 0.26, 0.5]].forEach(([f0, f1, o, d]) => {
+        const osc = ctx.createOscillator();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(f0, t + o);
+        osc.frequency.exponentialRampToValueAtTime(f1, t + o + d);
+        const lp = ctx.createBiquadFilter();
+        lp.type = 'lowpass';
+        lp.frequency.value = 1000;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.0001, t + o);
+        g.gain.exponentialRampToValueAtTime(0.16, t + o + 0.03);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + o + d + 0.05);
+        osc.connect(lp); lp.connect(g); g.connect(out);
+        osc.start(t + o);
+        osc.stop(t + o + d + 0.1);
+      });
+    }
+  }
+
+  /* ---------- 읽어 주기 ---------- */
+  const tts = { ok: 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined', ko: null, en: null, loaded: false };
+  function pickVoices() {
+    if (!tts.ok) return;
+    const voices = speechSynthesis.getVoices();
+    if (!voices.length) return;
+    tts.loaded = true;
+    tts.ko = voices.find(v => /^ko/i.test(v.lang)) || null;
+    const us = voices.filter(v => /^en[-_]US/i.test(v.lang));
+    tts.en = us.find(v => /Google|Samantha|Aria|Jenny|Zira|Ava|Allison/i.test(v.name)) || us[0] || voices.find(v => /^en/i.test(v.lang)) || null;
+    checkTTS();
+  }
+  function say(text, lang, queue) {
+    if (!state.settings.sound || !tts.ok || !text) return;
+    try {
+      if (!queue) speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const en = lang === 'en';
+      u.lang = en ? 'en-US' : 'ko-KR';
+      const v = en ? tts.en : tts.ko;
+      if (v) u.voice = v;
+      u.rate = en ? 0.85 : 0.95;
+      u.pitch = 1.1;
+      u.onstart = () => setSpeech(true);
+      u.onend = u.onerror = () => setTimeout(() => {
+        if (!speechSynthesis.speaking && !speechSynthesis.pending) setSpeech(false);
+      }, 120);
+      speechSynthesis.speak(u);
+      setSpeech(true);
+    } catch (e) { /* 읽어 주기를 못 하면 조용히 넘어가요 */ }
+  }
+  function hush() {
+    if (tts.ok) speechSynthesis.cancel();
+    setSpeech(false);
+  }
+  function checkTTS() {
+    const note = $('ttsNote');
+    if (!tts.ok) {
+      note.textContent = '이 화면에서는 소리로 읽어 주기가 안 돼요. 어른이 낱말을 읽어 주세요. 크롬이나 사파리에서 열면 읽어 줄 수 있어요.';
+      note.hidden = false;
+      return;
+    }
+    if (!tts.loaded) { note.hidden = true; return; }
+    const missing = [];
+    if (!tts.ko) missing.push('한국어');
+    if (!tts.en) missing.push('영어');
+    note.hidden = !missing.length;
+    if (missing.length) note.textContent = `이 기기에는 ${missing.join('·')} 목소리가 없어서 소리가 어색할 수 있어요. 어른이 낱말을 읽어 주세요.`;
+  }
+
+  let wake = null;
+  async function keepAwake() {
+    try {
+      if ('wakeLock' in navigator && !wake) {
+        wake = await navigator.wakeLock.request('screen');
+        wake.addEventListener('release', () => { wake = null; });
+      }
+    } catch (e) { wake = null; }
+  }
+
+  /* ---------- 화면 전환 ---------- */
+  const timers = { next: 0, say: 0, toast: 0 };
+  function clearTimers() {
+    clearTimeout(timers.next);
+    clearTimeout(timers.say);
+    clearTimeout(timers.toast);
+    $('toast').hidden = true;
+  }
+  function showScreen(name) {
+    state.screen = name;
+    for (const id of ['setup', 'play', 'end']) $(id).hidden = id !== name;
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- 시작 화면 ---------- */
+  function renderSetup() {
+    const s = state.settings;
+    syncSeg($('cardSeg'), 'cards', s.cards);
+    $('alphaSetup').checked = s.alpha;
+    $('soundOn').checked = s.sound;
+    syncSoundBtn();
+    syncMusicUI();
+  }
+  function syncSeg(group, key, value) {
+    group.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b.dataset[key] === String(value))));
+  }
+  function syncSoundBtn() {
+    const on = state.settings.sound;
+    const b = $('soundBtn');
+    b.textContent = on ? '🔊' : '🔇';
+    b.setAttribute('aria-label', on ? '소리 끄기' : '소리 켜기');
+    b.setAttribute('aria-pressed', String(on));
+  }
+  function syncMusicUI() {
+    const m = state.settings.music;
+    syncSeg($('musicSeg'), 'track', m);
+    const b = $('musicBtn');
+    b.classList.toggle('on', m !== 'off');
+    $('musicLabel').textContent = TRACK_SHORT[m];
+    b.setAttribute('aria-label', `배경 음악: ${TRACK_NAME[m]}. 누르면 바꿔요`);
+  }
+
+  /* ---------- 음악 켜고 끄기 ---------- */
+  let musicStarted = false;
+  function applyMusic() {
+    const ctx = audio();
+    if (!ctx) return;
+    musicStarted = true;
+    const m = state.settings.music;
+    if (m === 'off' || document.visibilityState === 'hidden') Music.stop();
+    else Music.play(m);
+    syncMusicUI();
+  }
+  function setMusic(id) {
+    state.settings.music = id;
+    saveSettings();
+    unlockAudio();
+    applyMusic();
+  }
+  function cycleMusic() {
+    setMusic(TRACK_IDS[(TRACK_IDS.indexOf(state.settings.music) + 1) % TRACK_IDS.length]);
+  }
+  Music.onBeat = () => {
+    if (reducedMotion() || state.screen === 'end') return;
+    const body = document.querySelector(state.screen === 'play' ? '#box .body' : '#heroBox .body');
+    if (body && body.animate) body.animate([{ filter: 'brightness(1.45)' }, { filter: 'brightness(1)' }], { duration: 260, easing: 'ease-out' });
+  };
+
+  /* ---------- 게임 ---------- */
+  function makeCases() {
+    const out = [];
+    for (let i = 0; i < LETTERS.length; i++) {
+      let upper = Math.random() < 0.5;
+      if (i >= 2 && out[i - 1] === out[i - 2]) upper = !out[i - 1]; // 같은 모양이 세 번 이어지지 않게
+      out.push(upper);
+    }
+    return out;
+  }
+  function makeOptions(letter, upper, n) {
+    const looks = upper ? LOOK_UPPER[letter] : LOOK_LOWER[letter.toLowerCase()];
+    const nLook = n >= 6 ? 3 : n >= 4 ? 2 : 1;
+    const picks = shuffle(looks.toUpperCase().split('')).slice(0, nLook);
+    const rest = shuffle(LETTERS.filter(l => l !== letter && !picks.includes(l)));
+    while (picks.length < n - 1) picks.push(rest.shift());
+    return shuffle([letter].concat(picks)); // 대문자로 들고 있다가 문제에 맞춰 보여 줘요
+  }
+  function startGame() {
+    audio();
+    unlockAudio();
+    clearTimers();
+    state.game = { stars: 0, idx: 0, cases: makeCases(), history: [], current: null, locked: false };
+    showScreen('play');
+    newRound();
+    applyMusic();
+    keepAwake();
+    say('알파벳 찾기 파티를 시작해요!', 'ko');
+    speakHints(true);
+  }
+  function newRound() {
+    const g = state.game;
+    const letter = LETTERS[g.idx];
+    const upper = g.cases[g.idx];
+    const words = shuffle(WORDS[letter]).slice(0, Math.random() < 0.5 ? 3 : 4);
+    g.current = { letter, upper, words, options: makeOptions(letter, upper, state.settings.cards), wrong: [], solved: false, earned: 0 };
+    g.locked = false;
+    renderRound();
+  }
+  function speakHints(queue) {
+    const [text, lang] = hintLine();
+    say(text, lang, queue);
+  }
+  function hintLine() {
+    const c = state.game.current;
+    return state.settings.alpha
+      ? [c.words.map(w => w[0]).join(', '), 'en']
+      : [c.words.map(w => w[1]).join(', '), 'ko'];
+  }
+
+  function renderScores() {
+    const g = state.game;
+    $('scores').innerHTML = `<div class="score active"><span class="nm">모은 별</span><span class="st" aria-label="별 ${g.stars}개">★ ${g.stars}</span></div>`;
+    $('progress').textContent = `${g.idx + 1} / ${LETTERS.length}`;
+  }
+  function renderStrip() {
+    const g = state.game;
+    $('strip').innerHTML = LETTERS.map((L, i) => {
+      const ch = g.history[i];
+      if (ch) return `<li class="done">${ch}</li>`;
+      if (i === g.idx) return '<li class="now" aria-current="step">?</li>';
+      return '<li aria-hidden="true">·</li>';
+    }).join('');
+  }
+  function enWord(en, upper) {
+    const text = upper ? en.charAt(0).toUpperCase() + en.slice(1) : en.toLowerCase();
+    return `<b class="lead">${esc(text.charAt(0))}</b>${esc(text.slice(1))}`;
+  }
+  // 알파벳 보기를 켰거나 정답을 맞히면 영어 낱말로 보여 줘요
+  function renderHints(anim) {
+    const c = state.game.current;
+    const en = state.settings.alpha || c.solved;
+    const wrap = $('hints');
+    wrap.className = 'hints' + (en ? ' en' : '') + (anim ? ` ${anim}` : '');
+    wrap.innerHTML = c.words.map((w, i) => `
+      <button type="button" class="hint" data-i="${i}" style="--d:${i * 90}ms">
+        <span class="em" aria-hidden="true">${w[2]}</span><span class="wd"${en ? ' lang="en"' : ''}>${en ? enWord(w[0], c.upper) : esc(w[1])}</span>
+      </button>`).join('');
+  }
+  function renderStatus() {
+    const c = state.game.current;
+    const el = $('status');
+    if (c.solved) {
+      el.classList.add('win');
+      el.innerHTML = `<span>딩동댕!</span><span class="pair" lang="en">${c.letter} ${c.letter.toLowerCase()}</span><span class="stars" aria-label="별 ${c.earned}개">${'★'.repeat(c.earned)}<span class="off">${'★'.repeat(3 - c.earned)}</span></span>`;
+    } else {
+      el.classList.remove('win');
+      el.textContent = '이 낱말들은 어떤 알파벳으로 시작할까요?';
+    }
+  }
+  function renderAsk() {
+    const c = state.game.current;
+    const b = $('caseBadge');
+    b.className = `badge ${c.upper ? 'upper' : 'lower'}`;
+    b.innerHTML = c.upper ? '대문자 <b lang="en">ABC</b>' : '소문자 <b lang="en">abc</b>';
+    $('askText').textContent = c.solved ? '찾았어요!' : '중에서 골라요';
+  }
+  function renderCards() {
+    const c = state.game.current;
+    const cards = $('cards');
+    cards.dataset.n = c.options.length;
+    cards.classList.toggle('done', c.solved);
+    cards.innerHTML = c.options.map((L, k) => {
+      const cls = ['card'];
+      if (c.wrong.includes(L)) cls.push('nope');
+      if (c.solved && L === c.letter) cls.push('right');
+      return `<button type="button" class="${cls.join(' ')}" data-k="${k}" aria-label="${c.upper ? '대문자' : '소문자'} ${L}"><span class="lt" lang="en">${show(L, c.upper)}</span></button>`;
+    }).join('');
+  }
+  function renderRound() {
+    renderScores();
+    renderStrip();
+    renderStatus();
+    renderAsk();
+    renderHints('pop');
+    renderCards();
+    const box = $('box');
+    box.classList.remove('puff', 'shake', 'open');
+    $('stage').classList.remove('solved');
+    $('reveal').textContent = '';
+  }
+
+  function onCard(k, el) {
+    const g = state.game;
+    if (!g || g.locked) return;
+    const c = g.current;
+    if (c.solved) return;
+    const L = c.options[k];
+    if (c.wrong.includes(L)) return;
+    if (L === c.letter) { solve(el); return; }
+
+    c.wrong.push(L);
+    el.classList.add('nope');
+    replay($('box'), 'shake');
+    sfx('wrong');
+    tryAgain();
+  }
+  function tryAgain() {
+    const t = $('toast');
+    $('toastFace').textContent = pick(OOPS);
+    t.hidden = false;
+    replay(t, 'show');
+    replay($('toastFace'), 'face');
+    clearTimeout(timers.toast);
+    timers.toast = setTimeout(() => { t.hidden = true; }, 1400);
+    say('Try again!', 'en');
+  }
+  function solve(el) {
+    const g = state.game;
+    const c = g.current;
+    c.solved = true;
+    c.earned = Math.max(1, 3 - c.wrong.length); // 한 번에 맞히면 별 3개
+    g.stars += c.earned;
+    g.history[g.idx] = show(c.letter, c.upper);
+    g.locked = true;
+
+    el.classList.add('right');
+    $('cards').classList.add('done');
+    $('reveal').textContent = show(c.letter, c.upper);
+    $('box').classList.add('open');
+    $('stage').classList.add('solved');
+    replay($('stage'), 'glow');
+    clearTimeout(timers.toast);
+    $('toast').hidden = true;
+    renderStatus();
+    renderAsk();
+    renderScores();
+    renderStrip();
+    renderHints('flip');
+    hush();
+    fanfare(false);
+    confetti();
+    timers.say = setTimeout(() => say(`Great job! ${c.upper ? 'Uppercase' : 'Lowercase'} ${c.letter}!`, 'en'), 850);
+    timers.next = setTimeout(() => { if (state.game === g && state.screen === 'play') next(); }, NEXT_DELAY);
+  }
+  function next() {
+    const g = state.game;
+    g.idx++;
+    if (g.idx >= LETTERS.length) { showEnd(); return; }
+    newRound();
+    speakHints();
+  }
+  function showEnd() {
+    const g = state.game;
+    clearTimers();
+    showScreen('end');
+    $('endCard').innerHTML = `
+      <div class="end-stars">★ ${g.stars}개</div>
+      <div class="end-letters" lang="en" aria-label="찾은 알파벳: ${g.history.join(', ')}">${g.history.map(ch => `<span>${ch}</span>`).join('')}</div>`;
+    fanfare(true);
+    confetti();
+    say('A부터 Z까지 모두 찾았어요! 정말 잘했어요!', 'ko');
+    say('Hooray!', 'en', true);
+  }
+
+  function onHint(i, el) {
+    const g = state.game;
+    if (!g) return;
+    const c = g.current;
+    const w = c.words[i];
+    const en = state.settings.alpha || c.solved;
+    replay(el, 'tap');
+    say(en ? w[0] : w[1], en ? 'en' : 'ko');
+  }
+  function onStage() {
+    const g = state.game;
+    if (!g) return;
+    if (!g.current.solved) replay($('box'), 'puff');
+    const [text, lang] = g.current.solved ? [g.current.words.map(w => w[0]).join(', '), 'en'] : hintLine();
+    say(text, lang);
+  }
+  function setAlpha(on) {
+    state.settings.alpha = on;
+    saveSettings();
+    $('alphaView').checked = on;
+    $('alphaSetup').checked = on;
+    if (state.screen === 'play' && state.game && !state.game.current.solved) {
+      renderHints('flip');
+      const [text, lang] = hintLine();
+      say(text, lang);
+    }
+  }
+
+  let homeArmedAt = 0;
+  function onHome() {
+    const b = $('homeBtn');
+    if (Date.now() - homeArmedAt < 2500) {
+      homeArmedAt = 0;
+      b.textContent = '처음으로';
+      b.classList.remove('armed');
+      clearTimers();
+      hush();
+      showScreen('setup');
+      renderSetup();
+      return;
+    }
+    homeArmedAt = Date.now();
+    b.textContent = '한 번 더 누르면 나가요';
+    b.classList.add('armed');
+    setTimeout(() => {
+      if (Date.now() - homeArmedAt >= 2400) {
+        b.textContent = '처음으로';
+        b.classList.remove('armed');
+      }
+    }, 2500);
+  }
+  function toggleSound() {
+    state.settings.sound = !state.settings.sound;
+    if (!state.settings.sound) hush();
+    saveSettings();
+    syncSoundBtn();
+    $('soundOn').checked = state.settings.sound;
+  }
+
+  function confetti() {
+    if (reducedMotion()) return;
+    const layer = $('confetti');
+    const colors = ['var(--aurora-a)', 'var(--aurora-b)', 'var(--aurora-c)', 'var(--gold)', 'var(--ink)'];
+    for (let i = 0; i < 50; i++) {
+      const piece = document.createElement('i');
+      piece.style.left = `${Math.random() * 100}%`;
+      piece.style.background = colors[i % colors.length];
+      piece.style.setProperty('--dx', `${Math.random() * 160 - 80}px`);
+      piece.style.setProperty('--r', `${Math.random() * 900 - 450}deg`);
+      piece.style.setProperty('--t', `${1.6 + Math.random() * 1.4}s`);
+      piece.style.animationDelay = `${Math.random() * 0.35}s`;
+      if (i % 3 === 0) piece.style.borderRadius = '50%';
+      layer.appendChild(piece);
+    }
+    setTimeout(() => { layer.innerHTML = ''; }, 3600);
+  }
+
+  /* ---------- 이벤트 ---------- */
+  function bindEvents() {
+    $('cardSeg').addEventListener('click', e => {
+      const b = e.target.closest('button[data-cards]');
+      if (!b) return;
+      state.settings.cards = +b.dataset.cards;
+      saveSettings();
+      syncSeg($('cardSeg'), 'cards', b.dataset.cards);
+    });
+    $('musicSeg').addEventListener('click', e => {
+      const b = e.target.closest('button[data-track]');
+      if (b) setMusic(b.dataset.track);
+    });
+    $('alphaSetup').addEventListener('change', e => setAlpha(e.target.checked));
+    $('alphaView').addEventListener('change', e => setAlpha(e.target.checked));
+    $('soundOn').addEventListener('change', e => {
+      state.settings.sound = e.target.checked;
+      if (!e.target.checked) hush();
+      saveSettings();
+      syncSoundBtn();
+    });
+    $('startBtn').addEventListener('click', startGame);
+    $('hints').addEventListener('click', e => {
+      const b = e.target.closest('.hint');
+      if (b) onHint(+b.dataset.i, b);
+    });
+    $('stage').addEventListener('click', onStage);
+    $('stage').addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onStage(); }
+    });
+    $('cards').addEventListener('click', e => {
+      const b = e.target.closest('.card');
+      if (b) onCard(+b.dataset.k, b);
+    });
+    $('musicBtn').addEventListener('click', cycleMusic);
+    $('soundBtn').addEventListener('click', toggleSound);
+    $('homeBtn').addEventListener('click', onHome);
+    $('againBtn').addEventListener('click', startGame);
+    $('setupBtn').addEventListener('click', () => { hush(); showScreen('setup'); renderSetup(); });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') { Music.stop(); return; }
+      if (musicStarted) applyMusic();
+      if (state.screen === 'play') keepAwake();
+    });
+    if (tts.ok) {
+      pickVoices();
+      if (speechSynthesis.addEventListener) speechSynthesis.addEventListener('voiceschanged', pickVoices);
+      else speechSynthesis.onvoiceschanged = pickVoices;
+    }
+  }
+
+  loadSettings();
+  bindEvents();
+  renderSetup();
+  checkTTS();
+})();
+</script>
+</body>
+</html>
